@@ -52,7 +52,7 @@ graph TD
     end
 
     L -->|Release Verdict| M{Verdict Approved?}
-    M -->|"Yes (Score >= 80%)"| N[Release Funds Automatically]
+    M -->|Yes - Score Over 80| N[Release Funds Automatically]
     M -->|No| O[Hold Funds / Request Re-review]
     N -->|Call contract function| B
 ```
