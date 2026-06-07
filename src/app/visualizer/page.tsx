@@ -377,7 +377,7 @@ function VisualizerContent() {
           <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-card)' }}>
             {/* Log Header */}
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifycontent: 'space-between', marginBottom: 12, justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
                   <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 14, fontWeight: 600, color: 'var(--text)', margin: 0 }}>System Audit Logs</h3>
                   <div style={{ fontSize: 11, color: 'var(--subtle)', fontFamily: 'monospace', marginTop: 2 }}>{filteredLogs.length} entries shown</div>
@@ -433,7 +433,7 @@ function VisualizerContent() {
                     <span>TIME</span>
                     <span>AGENT</span>
                     <span>LOG DESCRIPTION</span>
-                    <span style={{ textalign: 'right', textAlign: 'right' }}>STATUS</span>
+                    <span style={{ textAlign: 'right' }}>STATUS</span>
                   </div>
 
                   {/* Feed rows */}
