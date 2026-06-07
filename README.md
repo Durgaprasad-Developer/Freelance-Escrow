@@ -52,10 +52,21 @@ graph TD
     end
 
     L -->|Release Verdict| M{Verdict Approved?}
-    M -->|Yes (Score >= 80%)| N[Release Funds Automatically]
+    M -->|"Yes (Score >= 80%)"| N[Release Funds Automatically]
     M -->|No| O[Hold Funds / Request Re-review]
     N -->|Call contract function| B
 ```
+
+### 🧑‍💻 Developer Git & Escrow Workflow
+
+To successfully build and receive payouts on krow, follow this workflow:
+
+1. **Escrow Initialization:** The client registers the project, sets the target milestones, and funds the escrow contract on the Monad network.
+2. **Branch Creation:** The developer branches off `main` to work on a specific milestone (e.g., `git checkout -b feature/auth`).
+3. **Commit & Document:** Write clean code and document progress. Include reference tags in your commit messages that link back to the requirements (e.g., `feat: implement login page (resolves Milestone 1)`).
+4. **Open Pull Request:** Once a milestone is complete, open a Pull Request back into the target repository branch.
+5. **Run Verification:** Trigger the verification engine via the krow dashboard. The **6-Agent AI Orchestra** will run static and semantic audits on your code diffs.
+6. **Automatic Release:** Upon approval (milestone score >= 80%), the system calls the on-chain contract to execute the payout transaction directly to your wallet.
 
 ---
 
