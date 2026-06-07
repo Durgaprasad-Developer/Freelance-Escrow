@@ -1,13 +1,32 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FolderOpen, Bot, Lock, BarChart3 } from 'lucide-react';
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Bot,
+  Plus,
+  Wallet,
+  Zap,
+} from 'lucide-react';
 
 const navItems = [
-  { href: '/',           icon: LayoutDashboard, label: 'Overview'      },
-  { href: '/new',        icon: FolderOpen,      label: 'New Contract'  },
-  { href: '/visualizer', icon: Bot,             label: 'AI Engine'     },
+  { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard'           },
+  { href: '/new',        icon: FolderKanban,    label: 'New Escrow'          },
+  { href: '/visualizer', icon: Bot,             label: 'Verification Center' },
 ];
+
+function WalletButton() {
+  return (
+    <button
+      className="wallet-btn"
+      onClick={() => alert('Wallet connection coming soon — integrate wagmi/viem here')}
+    >
+      <Wallet className="w-3.5 h-3.5 flex-shrink-0" />
+      <span>Connect Wallet</span>
+    </button>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -17,70 +36,65 @@ export function Sidebar() {
       {/* Logo */}
       <Link href="/" className="sb-logo">
         <div className="sb-logo-icon">
-          <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
-            <path d="M16 2L28 8.5V23.5L16 30L4 23.5V8.5L16 2Z"
-              fill="rgba(123,104,238,0.2)" stroke="#7B68EE" strokeWidth="1.5" />
-            <path d="M16 9L22 12.5V19.5L16 23L10 19.5V12.5L16 9Z"
-              fill="rgba(123,104,238,0.5)" />
-            <circle cx="16" cy="16" r="3" fill="#7B68EE" />
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 2.5V15.5M4 9L13.5 2.5M4 9L13.5 15.5" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <div>
-          <div className="sb-logo-text">TrustlessEscrow</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-            <span className="dot dot-green" style={{ width: 5, height: 5 }} />
-            <span className="font-mono" style={{ fontSize: 10, color: 'var(--i4)' }}>Monad Devnet</span>
-          </div>
+          <div className="sb-logo-name">krow</div>
+          <div className="sb-logo-tag">AI-Verified Escrow</div>
         </div>
       </Link>
 
       {/* Nav */}
-      <div className="sb-section">NAVIGATION</div>
-      <nav style={{ flex: 1, padding: '4px 0' }}>
+      <div className="sb-section">Navigation</div>
+      <nav className="sidebar-nav">
         {navItems.map(item => {
-          const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          const active =
+            pathname === item.href ||
+            (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href));
           return (
-            <Link key={item.href} href={item.href} className={`sb-item${active ? ' active' : ''}`}>
-              <item.icon style={{ width: 15, height: 15, flexShrink: 0, opacity: active ? 1 : 0.6 }} />
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`sb-item${active ? ' active' : ''}`}
+            >
+              <item.icon className="sb-icon" />
               {item.label}
-              {active && (
-                <span style={{
-                  marginLeft: 'auto', width: 5, height: 5, borderRadius: '50%',
-                  background: 'var(--vl)', flexShrink: 0,
-                }} />
-              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom status */}
+      {/* Quick action */}
+      <div style={{ padding: '0 10px 12px' }}>
+        <Link
+          href="/new"
+          className="btn-primary"
+          style={{ width: '100%', justifyContent: 'center', fontSize: 13, padding: '9px' }}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          New Escrow
+        </Link>
+      </div>
+
+      {/* Bottom — status + wallet */}
       <div className="sb-bottom">
-        <div className="ai-status-pill">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span className="dot dot-green" style={{ width: 5, height: 5 }} />
-            <span className="font-mono" style={{ fontSize: 9, color: 'var(--em)', letterSpacing: '0.08em' }}>
-              AI ENGINE LIVE
-            </span>
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--i3)' }}>
-            Verification ready
-          </div>
+        {/* Network status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 4px 9px', marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>Monad Devnet</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--success)', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 2px' }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--v), var(--teal))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
-          }}>
-            ES
-          </div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--i2)' }}>Escrow Platform</div>
-            <div style={{ fontSize: 10, color: 'var(--i4)' }}>Pro Plan</div>
-          </div>
+
+        {/* AI Engine */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 4px 10px', marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
+          <Zap className="w-3.5 h-3.5" style={{ color: 'var(--warning)', flexShrink: 0 }} />
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>AI Engine</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--warning)', fontWeight: 600, letterSpacing: '0.04em' }}>READY</span>
         </div>
+
+        <WalletButton />
       </div>
     </aside>
   );

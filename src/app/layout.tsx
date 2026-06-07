@@ -3,22 +3,22 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'TrustlessEscrow — AI-Verified Freelance Payments',
-    template: '%s | TrustlessEscrow',
+    default: 'krow — AI-Verified Escrow for Software Development',
+    template: '%s | krow',
   },
   description:
-    'An AI-powered escrow platform that verifies GitHub progress against milestones and recommends automated payment releases on Monad.',
-  keywords: ['escrow', 'AI', 'freelance', 'GitHub', 'Monad', 'smart contract', 'verification'],
+    'krow is an AI-powered trustless escrow platform for freelance software development. Verify GitHub milestones automatically and release smart contract payments with confidence.',
+  keywords: ['escrow', 'AI verification', 'freelance', 'GitHub', 'Monad', 'smart contract', 'web3', 'krow'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>

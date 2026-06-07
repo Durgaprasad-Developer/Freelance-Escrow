@@ -1,40 +1,132 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Github, Loader2, AlertCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  Plus,
+  Github,
+  Loader2,
+  AlertCircle,
+  Sparkles,
+  Flag,
+  Info,
+  Lock,
+  Bot,
+  Banknote,
+  CheckCircle2,
+} from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 
-// Derive preview milestones from typed description
-function deriveMilestones(desc: string): string[] {
+interface MilestoneTemplate {
+  deliverables: string;
+  verification: string;
+}
+
+const MILESTONE_TEMPLATES: Record<string, MilestoneTemplate> = {
+  'Authentication': {
+    deliverables: 'User login/signup forms, JWT authorization middleware, session handling, password hashing.',
+    verification: 'AST check for secure passwords + automated execution of login/registration endpoint tests.'
+  },
+  'Dashboard': {
+    deliverables: 'Responsive overview panels, UI layout templates, charting libraries integration.',
+    verification: 'DOM render verification + synthetic tests for user interaction widgets.'
+  },
+  'CRUD Operations': {
+    deliverables: 'Entity schemas, forms for creation/editing, list filtering, status updates.',
+    verification: 'Automated test suite simulating creation, updating, and removal of test database records.'
+  },
+  'API Layer': {
+    deliverables: 'RESTful API routing architecture, controllers, schema validator middleware.',
+    verification: 'Linting compliance checks + HTTP response code verification across all endpoints.'
+  },
+  'Frontend UI': {
+    deliverables: 'Shared UI components library, styling theme token configurations, global layouts.',
+    verification: 'HTML/CSS standards compliance validation + components visual check.'
+  },
+  'Database Setup': {
+    deliverables: 'Database schema models configuration, seed files, deployment migrations script.',
+    verification: 'Database connection sanity check + validation of primary/foreign key constraints.'
+  },
+  'Testing & QA': {
+    deliverables: 'Unit and integration testing suites, GitHub Actions runner workflows configuration.',
+    verification: 'Automatic pipeline test run verification + code coverage metrics analysis.'
+  },
+  'Analytics': {
+    deliverables: 'Data computation algorithms, dashboards widgets, custom aggregators.',
+    verification: 'Calculations precision check + verification of visual updates on data changes.'
+  },
+  'Search & Filters': {
+    deliverables: 'Fuzzy search logic implementation, dynamic filtering, sorting indices.',
+    verification: 'Execution duration check + validation of result subsets against test records.'
+  },
+  'Notifications': {
+    deliverables: 'Email dispatchers, SMS integration modules, webhook payloads framework.',
+    verification: 'Mock server validation of outgoing dispatch status codes.'
+  },
+  'Payments': {
+    deliverables: 'Payment gateway API keys config, webhook listener endpoint, checkout workflows.',
+    verification: 'Verification of Stripe webhook signature parser + checkout link generation.'
+  },
+  'Deployment': {
+    deliverables: 'Docker configs, environment variables setup, static bundle build scripts.',
+    verification: 'Verification of build compiler output + checking production bundle status.'
+  },
+  'Core Setup': {
+    deliverables: 'Repository structuring, base packages dependencies, developer environment configs.',
+    verification: 'Inspection of initial workspace layout + verification of base configurations.'
+  },
+  'Main Features': {
+    deliverables: 'Main business logic modules, controllers, helper libraries.',
+    verification: 'Unit checks for controller endpoints + mock inputs validation.'
+  },
+  'UI & Design': {
+    deliverables: 'Sass/Tailwind style system definitions, custom font integrations, themes.',
+    verification: 'Audit of global classes + components styling layout verification.'
+  },
+  'Testing & Launch': {
+    deliverables: 'Production build script execution, end-to-end user tests, launch checklists.',
+    verification: 'Clean build checks + check for zero compiler warnings.'
+  }
+};
+
+function deriveMilestones(desc: string): { name: string; deliverables: string; verification: string }[] {
   if (!desc || desc.length < 15) return [];
   const rules: { key: RegExp; label: string }[] = [
     { key: /auth|login|signup|register|jwt|session|password/i, label: 'Authentication' },
-    { key: /dashboard|overview|home|landing/i,                  label: 'Dashboard' },
-    { key: /crud|create|read|update|delete|form|submit/i,       label: 'CRUD Operations' },
-    { key: /api|endpoint|route|rest|backend|server/i,           label: 'API Layer' },
-    { key: /ui|frontend|component|design|style|layout/i,        label: 'Frontend UI' },
+    { key: /dashboard|overview|home|landing/i,                  label: 'Dashboard'      },
+    { key: /crud|create|read|update|delete|form|submit/i,       label: 'CRUD Operations'},
+    { key: /api|endpoint|route|rest|backend|server/i,           label: 'API Layer'      },
+    { key: /ui|frontend|component|design|style|layout/i,        label: 'Frontend UI'   },
     { key: /database|db|model|schema|storage|mongo|sql/i,       label: 'Database Setup' },
-    { key: /test|spec|unit|integration|qa/i,                    label: 'Testing & QA' },
-    { key: /report|analytics|chart|graph|stat/i,                label: 'Analytics & Reports' },
-    { key: /search|filter|sort|query/i,                         label: 'Search & Filtering' },
+    { key: /test|spec|unit|integration|qa/i,                    label: 'Testing & QA'  },
+    { key: /report|analytics|chart|graph|stat/i,                label: 'Analytics'     },
+    { key: /search|filter|sort|query/i,                         label: 'Search & Filters'},
     { key: /notif|email|sms|alert|push/i,                       label: 'Notifications' },
-    { key: /payment|stripe|invoice|billing/i,                   label: 'Payment Integration' },
-    { key: /deploy|docker|ci|cd|production/i,                   label: 'Deployment' },
+    { key: /payment|stripe|invoice|billing/i,                   label: 'Payments'      },
+    { key: /deploy|docker|ci|cd|production/i,                   label: 'Deployment'    },
   ];
   const found = rules.filter(r => r.key.test(desc)).map(r => r.label);
-  if (found.length === 0) return ['Core Setup', 'Main Features', 'UI & Design', 'Testing & Launch'];
-  return found.slice(0, 5);
+  const selectedNames = found.length === 0
+    ? ['Core Setup', 'Main Features', 'UI & Design', 'Testing & Launch']
+    : found;
+
+  return selectedNames.slice(0, 5).map(name => {
+    const template = MILESTONE_TEMPLATES[name] || {
+      deliverables: 'Essential feature modules, configuration files, and components setup.',
+      verification: 'Static code analysis and verification of standard feature outputs.'
+    };
+    return { name, ...template };
+  });
 }
 
-export default function NewProject() {
+export default function NewEscrow() {
   const router = useRouter();
   const [title,        setTitle]        = useState('');
   const [description,  setDescription]  = useState('');
-  const [escrowAmount, setEscrowAmount] = useState('1.0');
+  const [escrowAmount, setEscrowAmount] = useState('100');
   const [githubUrl,    setGithubUrl]    = useState('');
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState('');
-  const [previewMs,    setPreviewMs]    = useState<string[]>([]);
+  const [previewMs,    setPreviewMs]    = useState<{ name: string; deliverables: string; verification: string }[]>([]);
 
   useEffect(() => {
     const t = setTimeout(() => setPreviewMs(deriveMilestones(description)), 350);
@@ -42,7 +134,6 @@ export default function NewProject() {
   }, [description]);
 
   const weightPer = previewMs.length > 0 ? Math.round(100 / previewMs.length) : 0;
-  const msColors  = ['#7B68EE', '#18c8a8', '#22c55e', '#f59e0b', '#f87171'];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,183 +143,256 @@ export default function NewProject() {
       const res = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, escrow_amount: escrowAmount, github_url: githubUrl }),
+        body: JSON.stringify({ title, description, escrow_amount: Number(escrowAmount), github_url: githubUrl }),
       });
       const d = await res.json();
-      if (!d.success) { setError(d.error ?? 'Failed to create project'); return; }
+      if (!d.success) { setError(d.error ?? 'Failed to create contract'); return; }
       router.push(`/project/${d.data.project.id}`);
-    } catch { setError('Network error. Try again.'); }
+    } catch { setError('Network error. Please try again.'); }
     finally { setLoading(false); }
   }
 
-  const hasPreview = previewMs.length > 0;
+  // Stepper state configurations
+  const stepState = title && description && escrowAmount ? 'completed' : 'current';
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: 'var(--bg)' }}>
+    <div className="app-shell animate-fade-in">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <div className="main-content">
 
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-7 py-4"
-          style={{ background: 'rgba(8,8,14,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--b)' }}>
-          <div className="flex items-center gap-3">
-            <ShieldCheck style={{ width: 18, height: 18, color: 'var(--v)' }} />
-            <div>
-              <h1 className="text-base font-semibold" style={{ color: 'var(--i1)' }}>New Escrow Contract</h1>
-              <p className="text-xs" style={{ color: 'var(--i3)' }}>Describe your project — AI will plan the milestones</p>
-            </div>
+        {/* Topbar */}
+        <div className="topbar">
+          <div>
+            <div style={{ fontSize: 10, color: 'var(--subtle)', letterSpacing: '0.08em', fontWeight: 600, marginBottom: 2, textTransform: 'uppercase', fontFamily: 'Inter' }}>Escrows</div>
+            <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 17, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              Initialize Escrow Contract
+            </h1>
           </div>
+          <p style={{ fontSize: 13, color: 'var(--muted)' }}>Provide project specifications to lock escrow funds</p>
         </div>
 
-        <div className="px-7 py-6">
+        <div className="page-content" style={{ background: 'var(--bg)' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto' }}>
 
-          {/* Step indicator */}
-          <div className="step-indicator">
-            <div className="step-item active">
-              <div className="step-num">1</div>
-              <span>Describe Project</span>
+            {/* Step indicator */}
+            <div className="step-indicator" style={{ marginBottom: 36 }}>
+              <div className={`step-item ${stepState === 'completed' ? 'done' : 'active'}`}>
+                <div className="step-num">{stepState === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : '1'}</div>
+                <span>1. Describe Project Requirements</span>
+              </div>
+              <div className="step-connector" />
+              <div className={`step-item ${stepState === 'completed' ? 'active' : ''}`} style={{ opacity: stepState === 'completed' ? 1 : 0.6 }}>
+                <div className="step-num">2</div>
+                <span>2. AI Generated Milestones</span>
+              </div>
+              <div className="step-connector" />
+              <div className="step-item" style={{ opacity: 0.5 }}>
+                <div className="step-num">3</div>
+                <span>3. Deploy Smart Escrow</span>
+              </div>
             </div>
-            <div className="step-connector" />
-            <div className="step-item">
-              <div className="step-num">2</div>
-              <span>AI Plans Milestones</span>
-            </div>
-            <div className="step-connector" />
-            <div className="step-item">
-              <div className="step-num">3</div>
-              <span>Run Audit</span>
-            </div>
-          </div>
 
-          {/* Two-column layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24, alignItems: 'start', marginBottom: 28 }}>
 
-            {/* LEFT: Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Form Card */}
+              <form onSubmit={handleSubmit}>
+                <div className="card" style={{ padding: '28px 30px' }}>
+                  <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 20, letterSpacing: '-0.02em' }}>
+                    Contract Configuration
+                  </h2>
 
-              {/* Title */}
+                  {/* Title */}
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="form-label">Project Name <span style={{ color: 'var(--error)' }}>*</span></label>
+                    <input
+                      id="project-title"
+                      type="text"
+                      required
+                      placeholder="e.g., Decentraship Dashboard Integration"
+                      value={title}
+                      onChange={e => setTitle(e.target.value)}
+                      className="form-input"
+                    />
+                  </div>
+
+                  {/* GitHub + Escrow */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+                    <div>
+                      <label className="form-label">GitHub Repository Link</label>
+                      <div style={{ position: 'relative' }}>
+                        <Github className="w-4 h-4" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--subtle)' }} />
+                        <input
+                          id="github-url"
+                          type="url"
+                          placeholder="https://github.com/org/repo"
+                          value={githubUrl}
+                          onChange={e => setGithubUrl(e.target.value)}
+                          className="form-input"
+                          style={{ paddingLeft: 36, fontFamily: 'monospace', fontSize: 12.5 }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="form-label">Escrow Budget (MON) <span style={{ color: 'var(--error)' }}>*</span></label>
+                      <input
+                        id="escrow-amount"
+                        type="number"
+                        min="1"
+                        required
+                        placeholder="100"
+                        value={escrowAmount}
+                        onChange={e => setEscrowAmount(e.target.value)}
+                        className="form-input"
+                        style={{ fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Requirements Textarea (Increased Size) */}
+                  <div style={{ marginBottom: 22 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 7, justifyContent: 'space-between' }}>
+                      <label className="form-label" style={{ margin: 0 }}>
+                        Milestone Definitions & Technical Criteria <span style={{ color: 'var(--error)' }}>*</span>
+                      </label>
+                      <span style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Sparkles className="w-3.5 h-3.5" /> AI Engine parsing active
+                      </span>
+                    </div>
+                    <textarea
+                      id="project-description"
+                      rows={12}
+                      required
+                      placeholder={`Provide a comprehensive specification list. The AI will translate this text directly into cryptographic and code-level verification checkpoints.\n\nExample:\n- User Authentication: Secure sign-up/sign-in flows via JWT tokens.\n- API Layer: Setup 4 REST routes in Node/Express (GET, POST, PUT, DELETE).\n- Database Setup: Create schema configuration files for Users and Projects.\n- Deployment: Configure Dockerfile and trigger GitHub Actions compiler on pull request.`}
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      className="form-textarea"
+                    />
+                    <p style={{ fontSize: 11.5, color: 'var(--subtle)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'Inter' }}>
+                      <Info className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
+                      Specific deliverables ensure 100% automated agent verification accuracy.
+                    </p>
+                  </div>
+
+                  {/* Error display */}
+                  {error && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--error-soft)', border: '1px solid rgba(184,92,92,0.2)', marginBottom: 18 }}>
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                      <span style={{ fontSize: 13, color: 'var(--error)', fontFamily: 'Inter' }}>{error}</span>
+                    </div>
+                  )}
+
+                  <button
+                    id="create-project-btn"
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: 14 }}
+                  >
+                    {loading
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Deploying Escrow Contract…</>
+                      : <><Plus className="w-4 h-4" /> Create & Lock Escrow Budget</>}
+                  </button>
+                </div>
+              </form>
+
+              {/* Side Panels */}
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--i3)' }}>Project Title</label>
-                <input id="project-title" type="text" required
-                  placeholder="e.g. Diabetes Tracking Platform"
-                  value={title} onChange={e => setTitle(e.target.value)}
-                  className="w-full text-sm px-4 py-2.5 rounded-lg outline-none font-sans"
-                  style={{ background: 'var(--bg2)', border: '1px solid var(--b)', color: 'var(--i1)' }}
-                  onFocus={e => (e.target.style.borderColor = 'var(--v)')}
-                  onBlur={e  => (e.target.style.borderColor = 'var(--b)')} />
+                {/* Escrow flow (With Lucide Icons) */}
+                <div className="card" style={{ padding: '16px 20px', marginBottom: 14 }}>
+                  <div className="sect-label">Contract Protocol</div>
+                  {[
+                    { icon: Lock, t: 'Funds Locked', d: 'Budget held in Monad Smart Escrow Contract.' },
+                    { icon: Bot, t: 'AI Audited', d: 'Verification agents audit deliverables on PR.' },
+                    { icon: Banknote, t: 'Instant Payout', d: 'Contract unlocks funds automatically on success.' },
+                  ].map((f, i) => {
+                    const Icon = f.icon;
+                    return (
+                      <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+                        <div style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--accent)' }}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{f.t}</div>
+                          <div style={{ fontSize: 11, color: 'var(--muted)', lineHeight: 1.4 }}>{f.d}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* AI Milestone Preview (Moved to bottom as a rich full-width table layout) */}
+            <div className="card animate-slide-up" style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9, background: 'var(--bg-card)' }}>
+                <Sparkles className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+                <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 14, fontWeight: 600, color: 'var(--text)', margin: 0 }}>
+                  Realtime Escrow Milestones Engine
+                </h3>
+                {previewMs.length > 0 && (
+                  <span className="badge badge-sand" style={{ marginLeft: 'auto' }}>
+                    {previewMs.length} Milestones Scheduled
+                  </span>
+                )}
               </div>
 
-              {/* GitHub + Escrow */}
-              <div className="grid grid-cols-2 gap-4">
+              {previewMs.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '48px 30px' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', border: '1px solid var(--border)' }}>
+                    <Flag className="w-5 h-5" style={{ color: 'var(--subtle)' }} />
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--subtle)', maxWidth: 420, margin: '0 auto' }}>
+                    Start typing project details in the form above. The AI engine will parse your guidelines and draft the milestone deliverables in realtime.
+                  </p>
+                </div>
+              ) : (
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--i3)' }}>GitHub Repository</label>
-                  <div className="relative">
-                    <Github className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--i4)' }} />
-                    <input id="github-url" type="url"
-                      placeholder="https://github.com/user/repo"
-                      value={githubUrl} onChange={e => setGithubUrl(e.target.value)}
-                      className="w-full text-sm pl-9 pr-4 py-2.5 rounded-lg outline-none font-mono"
-                      style={{ background: 'var(--bg2)', border: '1px solid var(--b)', color: 'var(--i1)' }}
-                      onFocus={e => (e.target.style.borderColor = 'var(--v)')}
-                      onBlur={e  => (e.target.style.borderColor = 'var(--b)')} />
+                  <table className="krow-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '22%' }}>Milestone</th>
+                        <th style={{ width: '48%' }}>Expected Deliverables</th>
+                        <th style={{ width: '20%' }}>Verification Agent Method</th>
+                        <th style={{ width: '10%', textAlign: 'right' }}>Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {previewMs.map((ms, i) => (
+                        <tr key={ms.name}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--accent)', border: '1px solid var(--border)' }}>
+                                {i + 1}
+                              </div>
+                              <span style={{ fontWeight: 600, color: 'var(--text)' }}>{ms.name}</span>
+                            </div>
+                          </td>
+                          <td style={{ fontSize: 12.5, lineHeight: 1.5, color: 'var(--muted)' }}>
+                            {ms.deliverables}
+                          </td>
+                          <td style={{ fontSize: 12, color: 'var(--subtle)' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--bg)', padding: '3px 8px', borderRadius: 4, border: '1px solid var(--border)' }}>
+                              <Bot className="w-3 h-3" style={{ color: 'var(--accent)' }} />
+                              {ms.verification}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: 'var(--accent)' }}>
+                            {weightPer}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg)', fontSize: 12, color: 'var(--subtle)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Sparkles className="w-4 h-4" style={{ color: 'var(--success)' }} />
+                    <span>Weights are automatically balanced equally across all generated milestones upon contract deploy.</span>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--i3)' }}>Escrow Amount (MON)</label>
-                  <input id="escrow-amount" type="number" step="0.1" min="0.1" required
-                    placeholder="1.0"
-                    value={escrowAmount} onChange={e => setEscrowAmount(e.target.value)}
-                    className="w-full text-sm px-4 py-2.5 rounded-lg outline-none font-mono"
-                    style={{ background: 'var(--bg2)', border: '1px solid var(--b)', color: 'var(--i1)' }}
-                    onFocus={e => (e.target.style.borderColor = 'var(--v)')}
-                    onBlur={e  => (e.target.style.borderColor = 'var(--b)')} />
-                </div>
-              </div>
-
-              {/* Requirements */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--i3)' }}>Project Requirements</label>
-                  <span className="text-xs font-mono" style={{ color: 'var(--v)' }}>AI reads this →</span>
-                </div>
-                <textarea id="project-description" rows={7} required
-                  placeholder={`Describe what must be built. Example:\n\n- User authentication with login and registration\n- Responsive dashboard with charts\n- CRUD operations for task management\n- REST API backend with database`}
-                  value={description} onChange={e => setDescription(e.target.value)}
-                  className="w-full text-sm px-4 py-2.5 rounded-lg outline-none font-sans resize-none"
-                  style={{ background: 'var(--bg2)', border: '1px solid var(--b)', color: 'var(--i1)', lineHeight: 1.7 }}
-                  onFocus={e => (e.target.style.borderColor = 'var(--v)')}
-                  onBlur={e  => (e.target.style.borderColor = 'var(--b)')} />
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#f87171' }}>
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
-                </div>
               )}
-
-              <button id="create-project-btn" type="submit" disabled={loading} className="btn-primary w-full justify-center py-3 text-sm disabled:opacity-40">
-                {loading
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating contract…</>
-                  : <><Plus className="w-4 h-4" /> Create AI Escrow Contract</>}
-              </button>
-            </form>
-
-            {/* RIGHT: Live Milestone Preview */}
-            <div style={{ position: 'sticky', top: 80 }}>
-              <div style={{ background: 'var(--bg1)', border: '1px solid var(--b)', borderRadius: 16, overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--b)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Sparkles style={{ width: 15, height: 15, color: 'var(--v)' }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--i1)' }}>AI Will Generate</span>
-                  {hasPreview && (
-                    <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: 9 }}>
-                      {previewMs.length} milestones
-                    </span>
-                  )}
-                </div>
-
-                <div style={{ padding: '16px 20px' }}>
-                  {!hasPreview ? (
-                    <div style={{ textAlign: 'center', padding: '28px 0' }}>
-                      <div style={{ fontSize: 32, marginBottom: 12 }}>✍️</div>
-                      <p style={{ fontSize: 12, color: 'var(--i4)', lineHeight: 1.6 }}>
-                        Start typing your requirements and the AI will preview the milestone plan here
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 11, color: 'var(--i4)', marginBottom: 12, fontFamily: 'DM Mono, monospace' }}>
-                        Detected from your description:
-                      </p>
-                      {previewMs.map((ms, i) => (
-                        <div key={ms} className="preview-ms-row animate-slide-up">
-                          <div style={{ width: 22, height: 22, borderRadius: 6, background: `${msColors[i % msColors.length]}18`, border: `1px solid ${msColors[i % msColors.length]}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: msColors[i % msColors.length], fontFamily: 'DM Mono, monospace' }}>{i+1}</span>
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--i1)', marginBottom: 3 }}>{ms}</div>
-                            <div style={{ height: 2, background: 'rgba(255,255,255,0.05)', borderRadius: 1, overflow: 'hidden' }}>
-                              <div className="shimmer" style={{ height: '100%', width: '60%', borderRadius: 1 }} />
-                            </div>
-                          </div>
-                          <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: msColors[i % msColors.length], fontFamily: 'DM Mono, monospace' }}>
-                              {weightPer}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                      <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'rgba(123,104,238,0.06)', border: '1px solid rgba(123,104,238,0.18)', fontSize: 11, color: 'var(--i3)', lineHeight: 1.6 }}>
-                        <span style={{ color: 'var(--vl)', fontWeight: 600 }}>After creation:</span> AI will lock weights, connect to your GitHub repo, and run automated verification on each milestone.
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
             </div>
-
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
