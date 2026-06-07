@@ -33,30 +33,6 @@
 
 ---
 
-## 🔄 System Flow Architecture
-
-```mermaid
-graph TD
-    A[Client Creates Project] -->|Locks MON in Escrow| B(Monad Smart Contract)
-    A -->|Defines Requirements| C[Milestones Set]
-    D[Developer Builds Code] -->|Opens PR / Pushes Commits| E[GitHub Repository]
-    E --> F[Trigger krow Verification Engine]
-    
-    subgraph AI Orchestra Pipeline
-        F --> G[1. GitHub Agent: Scan paths & diffs]
-        G --> H[2. Evidence Agent: Semantic matching]
-        H --> I[3. Milestone Agent: Analyze file contents]
-        I --> J[4. Verify Agent: Cross-check requirements]
-        J --> K[5. Report Agent: Compile audit logs]
-        K --> L[6. Payment Agent: Resolve escrow releases]
-    end
-
-    L -->|Release Verdict| M{Verdict Approved?}
-    M -->|Yes - Score Over 80| N[Release Funds Automatically]
-    M -->|No| O[Hold Funds / Request Re-review]
-    N -->|Call contract function| B
-```
-
 ### 🧑‍💻 Developer Git & Escrow Workflow
 
 To successfully build and receive payouts on krow, follow this workflow:
