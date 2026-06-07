@@ -1,221 +1,332 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import {
-  Plus, RefreshCw, ShieldCheck, Coins, CheckCircle, Clock,
-  AlertTriangle, GitBranch, Zap, BookOpen, FileCode, Database,
-} from 'lucide-react';
+import { Plus, RefreshCw, ShieldCheck, DollarSign, TrendingUp, AlertCircle, GitBranch, CheckCircle2, Clock, Zap } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import type { Project, BlockchainTx } from '@/lib/types';
 
-const statusCfg: Record<string, { label: string; cls: string }> = {
-  Created:  { label: 'Created',  cls: 'badge badge-amber'  },
-  Funded:   { label: 'Funded',   cls: 'badge badge-cyan'   },
+function fmt$(n: number) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function progColor(pct: number) { return pct >= 80 ? '#22c55e' : pct >= 50 ? '#7B68EE' : '#f59e0b'; }
+
+function ScoreRing({ score, size = 54 }: { score: number; size?: number }) {
+  const sw = 4, r = (size - sw * 2) / 2, circ = 2 * Math.PI * r;
+  const color = score === 0 ? '#33334a' : score >= 80 ? '#22c55e' : score >= 50 ? '#7B68EE' : '#f59e0b';
+  const circleRef = useRef<SVGCircleElement>(null);
+
+  useEffect(() => {
+    const el = circleRef.current;
+    if (!el) return;
+    const dash = (score / 100) * circ;
+    setTimeout(() => { el.style.strokeDasharray = `${dash} ${circ}`; }, 80);
+  }, [score, circ]);
+
+  return (
+    <div className="ring-wrap" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={sw} />
+        <circle ref={circleRef} cx={size/2} cy={size/2} r={r} fill="none"
+          stroke={color} strokeWidth={sw} strokeLinecap="round"
+          strokeDasharray={`0 ${circ}`}
+          style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1)' }}
+        />
+      </svg>
+      <div className="ring-label">
+        <span style={{ fontSize: Math.round(size * 0.22), fontWeight: 800, color, lineHeight: 1 }}>
+          {score === 0 ? '—' : score}
+        </span>
+        {score > 0 && <span style={{ fontSize: Math.round(size * 0.15), color: 'var(--i4)' }}>%</span>}
+      </div>
+    </div>
+  );
+}
+
+const statusConfig: Record<string, { label: string; cls: string }> = {
+  Created:  { label: 'Created',  cls: 'badge badge-teal'   },
+  Funded:   { label: 'Active',   cls: 'badge badge-purple' },
   Released: { label: 'Released', cls: 'badge badge-green'  },
-  Refunded: { label: 'Refunded', cls: 'badge badge-orange' },
+  Refunded: { label: 'Refunded', cls: 'badge badge-red'    },
+};
+
+const activityIcons: Record<string, string> = {
+  verified: '🤖', payment: '💸', commit: '📦', dispute: '⚖️', started: '🚀',
+};
+const activityColors: Record<string, string> = {
+  verified: '#7B68EE', payment: '#22c55e', commit: '#18c8a8', dispute: '#f59e0b', started: '#9090aa',
 };
 
 export default function Dashboard() {
   const [projects,     setProjects]     = useState<Project[]>([]);
   const [transactions, setTransactions] = useState<BlockchainTx[]>([]);
-  const [balances,     setBalances]     = useState({ client: 1000, freelancer: 250, contract: 0 });
+  const [balances,     setBalances]     = useState({ client: 0, freelancer: 0, contract: 0 });
   const [loading,      setLoading]      = useState(true);
 
   async function loadData() {
     setLoading(true);
     try {
-      const [projRes, txRes] = await Promise.all([
-        fetch('/api/projects'),
-        fetch('/api/blockchain'),
-      ]);
-      const projData = await projRes.json();
-      const txData   = await txRes.json();
-      if (projData.success) setProjects(projData.data);
-      if (txData.success) {
-        setTransactions(txData.data.transactions);
-        setBalances(txData.data.balances);
-      }
+      const [pRes, txRes] = await Promise.all([fetch('/api/projects'), fetch('/api/blockchain')]);
+      const pData = await pRes.json();
+      const txData = await txRes.json();
+      if (pData.success) setProjects(pData.data);
+      if (txData.success) { setTransactions(txData.data.transactions); setBalances(txData.data.balances); }
     } catch { /* ignore */ }
     finally { setLoading(false); }
   }
 
   useEffect(() => { loadData(); }, []);
 
+  const totalEscrowed = projects.reduce((s, p) => s + p.escrow_amount, 0);
+  const active = projects.filter(p => p.escrow_status === 'Funded').length;
+
   const stats = [
-    { label: 'Escrow Contracts', value: projects.length,                                                color: '#DA7756', icon: ShieldCheck },
-    { label: 'Client Wallet',    value: `${balances.client.toFixed(1)} MON`,                            color: '#67e8f9', icon: Coins      },
-    { label: 'Escrow Locked',    value: `${balances.contract.toFixed(1)} MON`,                          color: '#c084fc', icon: Zap        },
-    { label: 'Freelancer Paid',  value: `${balances.freelancer.toFixed(1)} MON`,                        color: '#4ade80', icon: CheckCircle },
+    { label: 'Total Escrowed',    val: fmt$(totalEscrowed),        sub: `${projects.length} contracts`,        cls: 'stat-purple' },
+    { label: 'Active Contracts',  val: String(active),             sub: `${projects.length - active} settled`, cls: 'stat-teal'   },
+    { label: 'Paid to Devs',      val: fmt$(balances.freelancer),  sub: 'Released & confirmed',                cls: 'stat-green'  },
+    { label: 'Client Wallet',     val: fmt$(balances.client),      sub: 'Available balance',                   cls: 'stat-amber'  },
   ];
 
+  // Quick activity feed from transactions
+  const feed = transactions.slice(0, 6).map(tx => ({
+    icon:    activityIcons[tx.method?.toLowerCase() ?? ''] ?? '📋',
+    color:   activityColors[tx.method?.toLowerCase() ?? ''] ?? '#9090aa',
+    msg:     `${tx.method} · ${fmt$(tx.value)} released`,
+    project: `Block #${tx.blockNumber}`,
+    time:    new Date(tx.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+  }));
+
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: '#0e0c0a' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)', fontFamily: 'Inter, sans-serif' }}>
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto">
-        {/* Sticky header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-7 py-4"
-          style={{ background: 'rgba(14,12,10,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #2e2b26' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* Topbar */}
+        <div className="topbar">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold" style={{ color: '#F5ECD7' }}>Dashboard</h1>
-              <div className="term-cursor" />
+            <div className="font-mono" style={{ fontSize: 9, color: 'var(--i4)', letterSpacing: '0.1em', marginBottom: 2 }}>
+              DASHBOARD · OVERVIEW
             </div>
-            <p className="text-sm mt-0.5" style={{ color: '#5a5248' }}>Manage your trustless escrow contracts</p>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--i1)', letterSpacing: '-0.02em' }}>
+              Escrow Manager
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button id="refresh-btn" onClick={loadData} className="btn-ghost" title="Refresh">
-              <RefreshCw className="w-4 h-4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)',
+              borderRadius: 100, padding: '4px 12px',
+            }}>
+              <span className="dot dot-green" style={{ width: 5, height: 5 }} />
+              <span className="font-mono" style={{ fontSize: 9, color: 'var(--em)', letterSpacing: '0.08em' }}>SYSTEM LIVE</span>
+            </div>
+            <button onClick={loadData} className="btn-ghost" style={{ padding: '7px 12px' }}>
+              <RefreshCw style={{ width: 14, height: 14 }} />
             </button>
-            <Link href="/new" id="new-project-btn" className="btn-primary text-sm px-5 py-2">
-              <Plus className="w-4 h-4" />
-              New Escrow
+            <Link href="/new" className="btn-primary">
+              <Plus style={{ width: 14, height: 14 }} /> New Contract
             </Link>
           </div>
         </div>
 
-        <div className="px-7 py-6 space-y-6">
+        {/* Main content */}
+        <div style={{ flex: 1, padding: 28, overflowY: 'auto' }}>
 
-          {/* Code flavor strip */}
-          <div className="code-flavor">
-            <span className="cm">// trustless_escrow.ts — </span>
-            <span className="kw">const</span> <span className="fn">verdict</span> = <span className="kw">await</span> <span className="fn">AI</span>.<span className="fn">audit</span>(<span className="st">"github"</span>, <span className="st">"milestones"</span>)
-            <span className="cm"> // evidence-only · no assumptions</span>
+          {/* Welcome row */}
+          <div style={{ marginBottom: 24 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--i1)', marginBottom: 4 }}>
+              Welcome back 👋
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--i3)' }}>
+              {loading ? 'Loading contracts…' : `${projects.length} escrow contract${projects.length !== 1 ? 's' : ''} · AI verification active`}
+            </p>
           </div>
 
-          {/* Stats */}
+          {/* Stats grid */}
           {!loading && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 28 }}>
               {stats.map(s => (
-                <div key={s.label} className="glass-card p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <s.icon className="w-4 h-4" style={{ color: s.color }} />
-                    <span className="text-xl font-bold font-mono" style={{ color: s.color }}>{s.value}</span>
-                  </div>
-                  <p className="text-xs" style={{ color: '#9a8f82' }}>{s.label}</p>
+                <div key={s.label} className={`stat-card ${s.cls}`}>
+                  <div className="stat-label">{s.label}</div>
+                  <div className="stat-val">{s.val}</div>
+                  <div className="stat-sub">{s.sub}</div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Grid: Contracts (left) + Blockchain TX Log (right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Two column layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
 
-            {/* Left: Project list */}
-            <div className="lg:col-span-2 space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: '#5a5248' }}>
-                <Database className="w-3.5 h-3.5" style={{ color: '#DA7756' }} /> Active Contracts
-              </h2>
+            {/* Left: Projects */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--i1)' }}>Active Contracts</h2>
+                <div className="sect-label" style={{ margin: 0 }}>
+                  {loading ? '—' : `${projects.length} total`}
+                </div>
+              </div>
 
               {loading ? (
-                <div className="space-y-2">
-                  {[1,2,3].map(i => <div key={i} className="glass-card h-20 shimmer" />)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {[1,2,3].map(i => (
+                    <div key={i} className="shimmer" style={{ height: 100, borderRadius: 16 }} />
+                  ))}
                 </div>
               ) : projects.length === 0 ? (
-                <div className="glass-card p-16 text-center">
-                  <BookOpen className="w-12 h-12 mx-auto mb-4" style={{ color: 'rgba(218,119,86,0.35)' }} />
-                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#F5ECD7' }}>No escrow contracts yet</h3>
-                  <p className="text-sm mb-6" style={{ color: '#9a8f82' }}>
-                    Create your first trustless contract and let AI verify milestone completion automatically.
+                <div className="card" style={{ padding: 60, textAlign: 'center' }}>
+                  <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: 'var(--i1)' }}>
+                    No escrow contracts yet
+                  </h3>
+                  <p style={{ fontSize: 13, color: 'var(--i3)', marginBottom: 24, lineHeight: 1.6 }}>
+                    Create your first contract and let AI verify milestone completion automatically.
                   </p>
                   <Link href="/new" className="btn-primary">
-                    <Plus className="w-4 h-4" />
-                    Create First Contract
+                    <Plus style={{ width: 14, height: 14 }} /> Create First Contract
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {projects.map(p => {
-                    const cfg = statusCfg[p.escrow_status] ?? statusCfg.Created;
-                    return (
-                      <Link key={p.id} href={`/project/${p.id}`}
-                        className="glass-card glass-card-hover flex items-center justify-between px-5 py-4 block">
-                        <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                            style={{ background: 'rgba(218,119,86,0.1)', border: '1px solid rgba(218,119,86,0.2)' }}>
-                            <ShieldCheck className="w-4 h-4" style={{ color: '#DA7756' }} />
-                          </div>
+                projects.map(p => {
+                  const cfg = statusConfig[p.escrow_status] ?? statusConfig.Created;
+                  const releasedPct = p.escrow_amount > 0 ? Math.round((balances.freelancer / p.escrow_amount) * 100) : 0;
+                  const completion = 50; // placeholder, real from milestones
 
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h3 className="font-semibold text-sm" style={{ color: '#F5ECD7' }}>{p.title}</h3>
-                              {p.github_url && (
-                                <span className="text-xs px-2 py-0.5 rounded font-mono"
-                                  style={{ background: '#1c1917', border: '1px solid #2e2b26', color: '#9a8f82' }}>
-                                  <GitBranch className="w-2.5 h-2.5 inline mr-1" />
-                                  {p.github_url.replace('https://github.com/', '')}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs line-clamp-1 mb-1.5" style={{ color: '#9a8f82' }}>{p.description}</p>
-                            <div className="flex items-center gap-4">
-                              <span className={cfg.cls}>{cfg.label}</span>
-                              <span className="text-xs font-mono" style={{ color: '#5a5248' }}>
-                                <Coins className="w-3.5 h-3.5 inline mr-1" />
-                                {p.escrow_amount} MON
-                              </span>
-                              <span className="text-xs" style={{ color: '#5a5248' }}>
-                                {new Date(p.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
+                  return (
+                    <Link key={p.id} href={`/project/${p.id}`} className="proj-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6, flexWrap: 'wrap' as const }}>
+                            <span className="font-mono" style={{ fontSize: 9, color: 'var(--i4)', letterSpacing: '0.07em' }}>
+                              ESCROW CONTRACT
+                            </span>
+                            <span className={cfg.cls}>
+                              <span className="badge-dot" /> {cfg.label}
+                            </span>
                           </div>
+                          <h3 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 5, color: 'var(--i1)' }}>
+                            {p.title}
+                          </h3>
+                          <p style={{ fontSize: 12, color: 'var(--i3)', marginBottom: 10, lineHeight: 1.4 }}>
+                            {p.description?.slice(0, 90)}{p.description?.length > 90 ? '…' : ''}
+                          </p>
+                          {p.github_url && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--vl)' }}>
+                              <GitBranch style={{ width: 10, height: 10 }} />
+                              <span className="font-mono">{p.github_url.replace('https://github.com/', '')}</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="ml-4 flex-shrink-0" style={{ color: '#5a5248' }}>›</div>
-                      </Link>
-                    );
-                  })}
-                </div>
+                        <ScoreRing score={0} size={52} />
+                      </div>
+
+                      {/* Progress bar */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--i4)', marginBottom: 5 }}>
+                          <span>Milestone progress</span>
+                          <span className="font-mono">—</span>
+                        </div>
+                        <div className="prog-track">
+                          <div className="prog-fill" style={{ width: '0%', background: 'var(--v)' }} />
+                        </div>
+                      </div>
+
+                      {/* Footer row */}
+                      <div style={{ display: 'flex', gap: 16, fontSize: 12, flexWrap: 'wrap' as const }}>
+                        <span style={{ color: 'var(--i3)' }}>
+                          Budget <strong style={{ color: 'var(--i1)' }}>{fmt$(p.escrow_amount)}</strong>
+                        </span>
+                        <span style={{ color: 'var(--i3)' }}>
+                          Released <strong style={{ color: 'var(--em)' }}>{fmt$(0)}</strong>
+                          <span style={{ color: 'var(--i4)' }}> (0%)</span>
+                        </span>
+                        <span className="font-mono" style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--i4)' }}>
+                          {new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })
               )}
             </div>
 
-            {/* Right: On-Chain Transaction Feed */}
-            <div className="space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: '#5a5248' }}>
-                <FileCode className="w-3.5 h-3.5" style={{ color: '#67e8f9' }} /> Monad Ledger Logs
-              </h2>
+            {/* Right: activity + breakdown */}
+            <div>
+              {/* Live Activity */}
+              <div style={{ marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: 14, fontWeight: 700 }}>Live Activity</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span className="dot dot-green" style={{ width: 5, height: 5 }} />
+                  <span className="font-mono" style={{ fontSize: 9, color: 'var(--em)' }}>LIVE</span>
+                </div>
+              </div>
 
-              {loading ? (
-                <div className="space-y-2">
-                  {[1,2,3].map(i => <div key={i} className="glass-card h-12 shimmer" />)}
-                </div>
-              ) : transactions.length === 0 ? (
-                <div className="glass-card p-8 text-center text-xs font-mono" style={{ color: '#5a5248' }}>
-                  No transaction events emitted yet.
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                  {transactions.map(tx => (
-                    <div key={tx.hash} className="glass-card p-3 font-mono text-xs space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-cyan-400 font-bold">{tx.method}</span>
-                        <span className="text-green-400 font-bold">+{tx.value} MON</span>
+              <div className="card" style={{ marginBottom: 16, overflow: 'hidden' }}>
+                {feed.length === 0 ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--i4)', fontSize: 12 }}>
+                    No transactions yet
+                  </div>
+                ) : (
+                  feed.map((a, i) => (
+                    <div key={i} className="act-item">
+                      <div className="act-icon" style={{ background: `${a.color}18`, border: `1px solid ${a.color}28` }}>
+                        {a.icon}
                       </div>
-                      <div className="flex justify-between" style={{ color: '#5a5248' }}>
-                        <span>Block: {tx.blockNumber}</span>
-                        <span>{new Date(tx.timestamp).toLocaleTimeString()}</span>
-                      </div>
-                      <div className="truncate text-xxs flex justify-between gap-2 pt-1" style={{ borderTop: '1px solid #1c1917' }}>
-                        <span className="truncate" style={{ color: '#9a8f82' }}>Hash: {tx.hash.substring(0, 16)}...</span>
-                        <span className="text-cyan-500 hover:underline cursor-pointer">Explorer ↗</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, color: 'var(--i2)', marginBottom: 3, lineHeight: 1.4 }}>{a.msg}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 10, color: 'var(--i4)' }}>{a.project}</span>
+                          <span className="font-mono" style={{ fontSize: 9, color: 'var(--i4)' }}>{a.time}</span>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  ))
+                )}
+              </div>
+
+              {/* Escrow Breakdown */}
+              <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Escrow Breakdown</h3>
+                {[
+                  { l: 'Paid to Developers', v: balances.freelancer,  t: Math.max(totalEscrowed, 1), c: 'var(--em)'   },
+                  { l: 'Locked in Escrow',   v: balances.contract,    t: Math.max(totalEscrowed, 1), c: 'var(--v)'    },
+                  { l: 'Client Balance',     v: balances.client,      t: Math.max(totalEscrowed, 1), c: 'var(--teal)' },
+                ].map(({ l, v, t, c }) => (
+                  <div key={l} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                      <span style={{ color: 'var(--i3)' }}>{l}</span>
+                      <span className="font-mono" style={{ color: c }}>{fmt$(v)}</span>
+                    </div>
+                    <div className="prog-track">
+                      <div className="prog-fill" style={{ width: `${Math.round((v / t) * 100)}%`, background: c }} />
+                    </div>
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid var(--b)', paddingTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                  <span style={{ color: 'var(--i3)' }}>Total Platform Volume</span>
+                  <span style={{ fontWeight: 700 }}>{fmt$(totalEscrowed)}</span>
                 </div>
-              )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="card" style={{ padding: 16 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h3>
+                {[
+                  { icon: '🤖', label: 'Run AI Verification',    bg: 'var(--vx)', border: 'var(--vb)', color: 'var(--vl)', href: '/visualizer' },
+                  { icon: '💸', label: 'Create New Contract',    bg: 'var(--eg)', border: 'rgba(34,197,94,0.2)', color: 'var(--em)', href: '/new' },
+                ].map(q => (
+                  <Link key={q.label} href={q.href} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px',
+                    background: q.bg, border: `1px solid ${q.border}`, borderRadius: 9,
+                    cursor: 'pointer', marginBottom: 7, textDecoration: 'none',
+                    transition: 'all 0.15s',
+                  }}>
+                    <span style={{ fontSize: 16 }}>{q.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: q.color }}>{q.label}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-
           </div>
-
-          {/* Footer status strip */}
-          <div className="flex justify-between items-center text-xs font-mono px-4 py-2.5 rounded-md"
-            style={{ background: '#141210', border: '1px solid #201e1b', color: '#5a5248' }}>
-            <span>contracts: <span style={{ color: '#DA7756' }}>{projects.length}</span></span>
-            <span>network: <span style={{ color: '#4ade80' }}>Monad Devnet</span></span>
-            <span>engine: <span style={{ color: '#67e8f9' }}>trustless-ai-v1</span></span>
-          </div>
-
         </div>
-      </main>
+      </div>
     </div>
   );
 }
