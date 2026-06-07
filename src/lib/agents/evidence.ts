@@ -77,7 +77,7 @@ ${JSON.stringify(commits.map(c => `${sha7(c)} ${c.message}`))}`;
 
         for (const m of milestones) {
           const match = findFuzzyMatch(m.title, parsed.evidence) || { status: 'missing', files: [], commits: [], reasoning: 'No matching evidence found by LLM.' };
-          const status = ['completed', 'partial', 'missing'].includes(match.status) ? match.status : 'missing';
+          const status = (['completed', 'partial', 'missing'].includes(match.status) ? match.status : 'missing') as 'completed' | 'partial' | 'missing';
           evidence[m.title] = {
             milestoneTitle: m.title,
             status: status as any,

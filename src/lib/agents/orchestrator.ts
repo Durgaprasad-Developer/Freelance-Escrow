@@ -158,7 +158,7 @@ export async function startPipeline(
       log('report', 'Audit pipeline completed successfully. Escrow funds calculated and staged.', 'success');
 
     } catch (e: any) {
-      state.status = 'error';
+      state.status = 'failed';
       state.currentAgent = undefined;
       log('report', `Orchestrator failed: ${e.message}`, 'error');
     }
