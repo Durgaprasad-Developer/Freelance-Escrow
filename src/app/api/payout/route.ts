@@ -4,6 +4,11 @@ import { blockchain }   from '@/lib/blockchain';
 
 export async function POST(req: Request) {
   try {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { payoutId, action } = await req.json(); // action: 'approve' | 'refund'
     if (!payoutId || !action) return NextResponse.json({ success: false, error: 'payoutId and action required' }, { status: 400 });
 

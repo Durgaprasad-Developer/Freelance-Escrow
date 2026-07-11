@@ -13,7 +13,7 @@ export async function askLLM(prompt: string, systemInstruction: string, jsonMode
 
   if(groqKey) {
     try {
-      const groq = new Groq()
+      const groq = new Groq({ apiKey: groqKey })
       const res = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         messages: [

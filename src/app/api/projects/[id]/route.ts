@@ -24,7 +24,12 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
   try {
     const { id } = await params;
     const body = await _req.json();
-    const project = await db.updateProject(id, body);
+    const updateData: any = {};
+    if (body.title) updateData.title = body.title;
+    if (body.description) updateData.description = body.description;
+    if (body.github_url) updateData.github_url = body.github_url;
+    
+    const project = await db.updateProject(id, updateData);
     if (!project) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: project });
   } catch (e: any) {

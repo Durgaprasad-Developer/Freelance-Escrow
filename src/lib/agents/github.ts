@@ -18,7 +18,7 @@ export async function runGithubAgent(
     }
   } catch { /* ignore parsing error */ }
 
-  const token = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+  const token = process.env.GITHUB_TOKEN;
 
   if (token) {
     try {

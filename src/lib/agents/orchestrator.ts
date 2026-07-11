@@ -12,7 +12,28 @@ import type { PipelineState, AgentLog, AgentName } from '@/lib/types';
 // ── In-process run registry ─────────────────────────────────────────────────
 const registry = new Map<string, PipelineState>();
 
+function loadRegistry() {
+  if (typeof window !== 'undefined') return;
+  try {
+    const fs = require('fs');
+    const path = process.env.NODE_ENV === 'production' ? '/tmp/pipelines.json' : 'src/lib/pipelines.json';
+    if (fs.existsSync(path)) {
+      const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+      for (const [k, v] of Object.entries(data)) registry.set(k, v as PipelineState);
+    }
+  } catch {}
+}
+
+function saveRegistry() {
+  if (typeof window !== 'undefined') return;
+  try {
+    const fs = require('fs');
+    const path = process.env.NODE_ENV === 'production' ? '/tmp/pipelines.json' : 'src/lib/pipelines.json';
+    fs.writeFileSync(path, JSON.stringify(Object.fromEntries(registry)), 'utf8');
+  } catch {}
+}
 export function getPipelineState(projectId: string): PipelineState | undefined {
+  loadRegistry();
   return registry.get(projectId);
 }
 
@@ -23,6 +44,7 @@ export async function startPipeline(
 ): Promise<PipelineState> {
 
   // Idempotent: don't restart if already running
+  loadRegistry();
   const existing = registry.get(projectId);
   if (existing?.status === 'running') return existing;
 
@@ -42,11 +64,12 @@ export async function startPipeline(
   // ── Helper to append a log entry ──────────────────────────────────────────
   const log = (agent: AgentName, message: string, type: AgentLog['type'] = 'info', payload?: unknown) => {
     state.logs.push({ timestamp: new Date().toISOString(), agent, message, type, payload });
+    saveRegistry();
   };
   const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-  // ── Run asynchronously so the API can return the initial state immediately ─
-  (async () => {
+  // ── Run synchronously so Vercel lambda doesn't freeze ─
+  await (async () => {
     try {
       // ── Stage 1: GitHub ──────────────────────────────────────────────────
       state.currentAgent = 'github';
@@ -161,6 +184,7 @@ export async function startPipeline(
       state.status = 'failed';
       state.currentAgent = undefined;
       log('report', `Orchestrator failed: ${e.message}`, 'error');
+      saveRegistry();
     }
   })();
 

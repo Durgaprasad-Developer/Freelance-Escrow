@@ -148,7 +148,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     try {
       const res = await fetch('/api/payout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-token'}`
+        },
         body: JSON.stringify({ payoutId, action }),
       });
       if (res.ok) {

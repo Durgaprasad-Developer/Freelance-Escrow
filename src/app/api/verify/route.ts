@@ -1,6 +1,8 @@
 import { NextResponse }            from 'next/server';
 import { startPipeline, getPipelineState } from '@/lib/agents/orchestrator';
 
+export const maxDuration = 60; // Allow Vercel to keep lambda alive for 60s
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const projectId = searchParams.get('projectId');

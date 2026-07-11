@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Project, Milestone, Repository, Review, Payout } from '@/lib/types';
 
-const DB_FILE = path.join(process.cwd(), 'src/lib/db.json');
+const DB_FILE = process.env.NODE_ENV === 'production' ? '/tmp/escrow_db.json' : path.join(process.cwd(), 'src/lib/db.json');
 
 function readDbFile(): Record<string, any[]> {
   try {
@@ -59,7 +59,6 @@ function persist<T>(key: string, data: T[]) {
 let supabase: any = null;
 if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createClient } = require('@supabase/supabase-js');
     supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
