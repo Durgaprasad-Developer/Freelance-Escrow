@@ -147,12 +147,12 @@ export default function LandingPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <ThemeToggle />
-          <a href="https://github.com" target="_blank" rel="noreferrer"
+          {/* <a href="https://github.com" target="_blank" rel="noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', textDecoration: 'none', fontSize: 13.5, fontWeight: 500, fontFamily: 'Inter, sans-serif', transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sand)'; e.currentTarget.style.color = 'var(--text)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--muted)'; }}>
             <Github className="w-4 h-4" /> GitHub
-          </a>
+          </a> */}
           <Link href="/dashboard"
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px', borderRadius: 8, background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', textDecoration: 'none', fontSize: 13.5, fontWeight: 600, fontFamily: 'Inter, sans-serif', transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
