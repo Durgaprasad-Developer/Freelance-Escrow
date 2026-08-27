@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter }           from 'next/navigation';
+import Script                  from 'next/script';
 import {
   Plus,
   Github,
@@ -150,8 +151,69 @@ export default function NewEscrow() {
       if (!d.success) { setError(d.error ?? 'Failed to create contract'); return; }
       const projectId = d.data.project.id;
 
-      // Simulate on-chain deposit (mock — no MetaMask required)
-      await new Promise(res => setTimeout(res, 600));
+      // ── Razorpay Checkout ────────────────────────────────────────────────
+      try {
+        // 1. Create a Razorpay Order
+        const orderRes = await fetch('/api/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'order', projectId, amount: Number(escrowAmount) }),
+        });
+        const orderData = await orderRes.json();
+
+        if (!orderData.success || !orderData.data?.keyId || orderData.data.keyId.includes('REPLACE_ME')) {
+          // Razorpay not configured yet — skip payment modal, project is already created
+          router.push(`/project/${projectId}`);
+          return;
+        }
+
+        // 2. Open the Razorpay Checkout modal
+        await new Promise<void>((resolve, reject) => {
+          const options = {
+            key:         orderData.data.keyId,
+            amount:      orderData.data.amount,
+            currency:    orderData.data.currency,
+            name:        'TrustlessEscrow',
+            description: `Escrow lock for: ${title}`,
+            order_id:    orderData.data.orderId,
+            theme:       { color: '#8B7355' },
+            handler: async (response: any) => {
+              try {
+                // 3. Verify signature and create held Route transfer
+                const verifyRes = await fetch('/api/payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action:                'verify',
+                    projectId,
+                    amount:               Number(escrowAmount),
+                    razorpay_order_id:    response.razorpay_order_id,
+                    razorpay_payment_id:  response.razorpay_payment_id,
+                    razorpay_signature:   response.razorpay_signature,
+                  }),
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyData.success) { resolve(); }
+                else { reject(new Error(verifyData.error ?? 'Payment verification failed')); }
+              } catch (err: any) { reject(err); }
+            },
+            modal: {
+              ondismiss: () => reject(new Error('Payment cancelled by user')),
+            },
+          };
+          // Razorpay script is loaded via <Script> tag below
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+        });
+      } catch (payErr: any) {
+        if (payErr.message === 'Payment cancelled by user') {
+          setError('Payment cancelled. Your project was saved — you can complete payment later.');
+          setLoading(false);
+          return;
+        }
+        console.error('[Razorpay]', payErr.message);
+        // Non-fatal — project is already created; redirect anyway
+      }
 
       router.push(`/project/${projectId}`);
     } catch { setError('Network error. Please try again.'); }
@@ -163,6 +225,8 @@ export default function NewEscrow() {
 
   return (
     <div className="app-shell animate-fade-in">
+      {/* Razorpay Checkout SDK — loads lazily, available when modal is triggered */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Sidebar />
       <div className="main-content">
 

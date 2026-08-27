@@ -136,7 +136,7 @@ export async function startPipeline(
       state.currentAgent = 'payment';
       log('payment', `Computing payout from ${escrowAmount} MON escrow pool…`);
       await sleep(1000);
-      const pyResult = await runPaymentAgent(milestones, msResult.milestoneScores, escrowAmount, evResult.confidence);
+      const pyResult = await runPaymentAgent(milestones, msResult.milestoneScores, escrowAmount, evResult.confidence, projectId);
       state.paymentResult = pyResult;
       log('payment', `Settlement: ${pyResult.completionPercentage}% complete → recommend releasing ${pyResult.recommendedRelease} MON.`, 'success', { completionPercentage: pyResult.completionPercentage, recommendedRelease: pyResult.recommendedRelease });
       await sleep(800);

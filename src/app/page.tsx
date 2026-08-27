@@ -81,24 +81,24 @@ const AGENTS = [
   { icon: Banknote, label: 'Payment Agent', role: 'Payout Arbitrator', desc: 'Computes the weighted escrow release and stages smart contract execution.', bg: 'var(--bg-alt)', color: 'var(--warning)' },
 ];
 
-const PROBLEMS = ['Manual subjective reviews', 'Disputes lasting weeks', 'Delayed, withheld payments', 'Human bias & favoritism', 'No objective evidence trail'];
-const SOLUTIONS = ['AI-verified GitHub analysis', 'Automated resolution in minutes', 'Instant smart contract payout', 'Objective, immutable code evidence', '6-agent verifiable audit trail'];
+const PROBLEMS = ['Subjective "this isn\'t done" disputes', 'Payment delayed weeks after delivery', 'Client ghosts after receiving the work', 'No evidence-based way to prove completion', 'Zero recourse for the developer'];
+const SOLUTIONS = ['AI reads your GitHub PR, scores each milestone', 'Verdict in minutes — not weeks', 'Razorpay Route holds funds, releases on AI approval', 'Objective audit trail: files, commits, completion %', 'Human override available if verdict is disputed'];
 
 const STEPS = [
-  { n: '01', title: 'Client Creates Contract', sub: 'Defines project requirements and locks MON into an on-chain escrow smart contract.', icon: Lock, color: 'var(--accent)', bg: 'var(--bg-alt)' },
-  { n: '02', title: 'Developer Builds', sub: 'Writes code, opens a GitHub Pull Request, and submits the repository to krow.', icon: Github, color: 'var(--text)', bg: 'var(--bg)' },
-  { n: '03', title: '6-Agent Orchestra', sub: 'Repository analysis, requirement matching, milestone scoring, audit report.', icon: Bot, color: 'var(--accent)', bg: 'var(--bg-alt)' },
-  { n: '04', title: 'Funds Released', sub: 'AI verdict triggers the escrow smart contract. Developer is paid automatically.', icon: Banknote, color: 'var(--success)', bg: 'var(--bg-alt)' },
+  { n: '01', title: 'Client Locks Budget', sub: 'Pays via Razorpay. Funds held in Route — neither party can touch them until the verdict.', icon: Lock, color: 'var(--accent)', bg: 'var(--bg-alt)' },
+  { n: '02', title: 'Developer Builds', sub: 'Writes code, opens a GitHub PR, and submits the repo URL to krow.', icon: Github, color: 'var(--text)', bg: 'var(--bg)' },
+  { n: '03', title: '6-Agent AI Audit', sub: 'Scans repo, maps files to milestones, scores 0–100% per deliverable, writes audit report.', icon: Bot, color: 'var(--accent)', bg: 'var(--bg-alt)' },
+  { n: '04', title: 'Automatic Settlement', sub: 'AI ≥80% → funds released. <20% → client refunded. Disputed → human review.', icon: Banknote, color: 'var(--success)', bg: 'var(--bg-alt)' },
 ];
 
-const MONAD_STATS = [
-  { val: '10,000', unit: ' TPS', desc: 'Transactions per second' },
-  { val: '1s', unit: '', desc: 'Block finality time' },
-  { val: '< $0.01', unit: '', desc: 'Per transaction cost' },
-  { val: '100%', unit: '', desc: 'EVM compatible' },
+const RAZORPAY_STATS = [
+  { val: '₹0', unit: ' custody', desc: 'We never hold your money — Razorpay Route does' },
+  { val: '1.5%', unit: '', desc: 'Fee on release only — free if no work is done' },
+  { val: '<5', unit: ' min', desc: 'Average AI verdict time' },
+  { val: '100%', unit: '', desc: 'Objective — no human bias in scoring' },
 ];
 
-const TRUST_BAR = ['Monad', 'GitHub', 'OpenAI', 'Next.js', 'Viem', 'Tailwind CSS'];
+const TRUST_BAR = ['Razorpay Route', 'GitHub API', 'Groq AI', 'Next.js', 'Supabase', 'Vercel'];
 
 export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
@@ -171,17 +171,17 @@ export default function LandingPage() {
             {/* Eyebrow */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 14px', borderRadius: 100, background: 'var(--bg-alt)', border: '1px solid var(--border)', marginBottom: 30 }}>
               <Zap className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }}>Built on Monad · 6-Agent AI Orchestra</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }}>Powered by Razorpay Route · 6-Agent AI Audit</span>
             </div>
 
             <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 54, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.04em', color: 'var(--text)', marginBottom: 24 }}>
-              Freelance Payments.<br />
-              <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Verified by AI.</em><br />
-              Released Automatically.
+              Stop fighting over<br />
+              <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>&ldquo;this isn&rsquo;t done&rdquo;</em><br />
+              disputes.
             </h1>
 
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, marginBottom: 38, maxWidth: 480 }}>
-              Stop disputes, delays, and subjective reviews. krow uses a 6-Agent AI Orchestra to verify GitHub pull requests and automatically release escrowed funds on Monad.
+              krow gives Indian dev freelancers and agencies doing direct client work an objective, AI-generated proof of milestone completion — so payment releases automatically and neither side has to trust the other&apos;s word.
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 42 }}>
@@ -201,9 +201,9 @@ export default function LandingPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: 13, color: 'var(--subtle)', fontFamily: 'Inter, sans-serif' }}>
               {[
-                { icon: <ShieldCheck className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />, text: 'Smart contract escrow' },
+                { icon: <ShieldCheck className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />, text: 'Razorpay Route escrow' },
                 { icon: <Bot className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />, text: 'AI-verified milestones' },
-                { icon: <Zap className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />, text: 'Instant settlement' },
+                { icon: <Zap className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />, text: '1.5% fee on release only' },
               ].map((f, i) => (
                 <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{f.icon} {f.text}</span>
               ))}
@@ -218,11 +218,11 @@ export default function LandingPage() {
               </div>
 
               {[
-                { icon: <User className="w-4 h-4" />, label: 'Client', sub: 'Creates contract', badge: 'Step 1', bc: 'var(--sand-soft)', bt: 'var(--accent)', done: true },
-                { icon: <Lock className="w-4 h-4" />, label: 'Escrow Locked', sub: '2,000 MON on Monad', badge: 'Funded', bc: 'var(--sand-soft)', bt: 'var(--accent)', done: true },
-                { icon: <Github className="w-4 h-4" />, label: 'Pull Request Submitted', sub: 'github.com/user/repo #42', badge: 'PR #42', bc: 'var(--bg)', bt: 'var(--muted)', done: true },
-                { icon: <Bot className="w-4 h-4" />, label: 'AI Verification', sub: '6 agents analyzing…', badge: 'Live', bc: 'var(--warning-soft)', bt: 'var(--warning)', done: false, active: true },
-                { icon: <Banknote className="w-4 h-4" />, label: 'Payment Released', sub: '1,840 MON → developer', badge: 'Pending', bc: 'var(--success-soft)', bt: 'var(--success)', done: false },
+                { icon: <User className="w-4 h-4" />, label: 'Client pays ₹20,000', sub: 'Razorpay Checkout · funds held', badge: 'Funded', bc: 'var(--sand-soft)', bt: 'var(--accent)', done: true },
+                { icon: <Lock className="w-4 h-4" />, label: 'Route Transfer Created', sub: 'on_hold: true · developer linked account', badge: 'Held', bc: 'var(--sand-soft)', bt: 'var(--accent)', done: true },
+                { icon: <Github className="w-4 h-4" />, label: 'PR Submitted for Review', sub: 'github.com/client/project #12', badge: 'PR #12', bc: 'var(--bg)', bt: 'var(--muted)', done: true },
+                { icon: <Bot className="w-4 h-4" />, label: 'AI Verification', sub: '6 agents analyzing repo…', badge: 'Live', bc: 'var(--warning-soft)', bt: 'var(--warning)', done: false, active: true },
+                { icon: <Banknote className="w-4 h-4" />, label: '₹18,500 Released', sub: 'Razorpay Route · hold lifted', badge: 'Pending', bc: 'var(--success-soft)', bt: 'var(--success)', done: false },
               ].map((step, i) => (
                 <div key={i}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
@@ -466,7 +466,7 @@ export default function LandingPage() {
                   <CheckCircle className="w-5 h-5" style={{ color: 'var(--success)', flexShrink: 0 }} />
                   <div>
                     <div style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 13, fontWeight: 700, color: 'var(--success)' }}>AI Verdict: Approved</div>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: 'var(--muted)' }}>1,840 MON released to developer</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: 'var(--muted)' }}>₹18,500 released · Razorpay Route settlement lifted</div>
                   </div>
                 </div>
               </div>
@@ -475,7 +475,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── WHY MONAD ────────────────────────────────────────────────────── */}
+      {/* ── WHY RAZORPAY ROUTE ───────────────────────────────────────────── */}
       <section style={{ padding: '100px 40px', background: 'var(--bg)', transition: 'background-color 0.3s ease' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <FadeSection>
@@ -488,7 +488,7 @@ export default function LandingPage() {
           </FadeSection>
           <FadeSection>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
-              {MONAD_STATS.map(s => (
+              {RAZORPAY_STATS.map(s => (
                 <div key={s.val}
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '26px 22px', textAlign: 'center', transition: 'all 0.18s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-alt)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--sand)'; }}
@@ -510,17 +510,17 @@ export default function LandingPage() {
           <FadeSection>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 14px', borderRadius: 100, background: 'var(--sand-soft)', border: '1px solid var(--border)', marginBottom: 32 }}>
               <Zap className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }}>Hackathon Demo — Monad Devnet</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }}>Early Access · Razorpay Test Mode</span>
             </div>
 
             <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 50, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text)', lineHeight: 1.1, marginBottom: 22 }}>
-              Build software.<br />
-              <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Let AI handle</em><br />
-              the trust.
+              Get paid the moment<br />
+              <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>your code proves</em><br />
+              it&apos;s done.
             </h2>
 
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 16, color: 'var(--muted)', lineHeight: 1.75, marginBottom: 42, maxWidth: 420, margin: '0 auto 42px' }}>
-              The first escrow platform where code becomes proof of work. No disputes. No delays. Just verified, automated payments.
+              For Indian dev freelancers and agencies doing direct client work. No platform lock-in, no subjective disputes — just an AI audit trail and automatic Razorpay settlement.
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -572,7 +572,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: 'var(--subtle)' }}>
-            © 2025 krow · Monad Hackathon
+            © 2026 krow · AI-Verified Escrow · Razorpay Route
           </div>
         </div>
       </footer>

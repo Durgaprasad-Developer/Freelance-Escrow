@@ -126,7 +126,7 @@ export interface Project {
   description:   string;
   client_id:     string;
   escrow_amount: number;
-  escrow_status: 'Created' | 'Funded' | 'Released' | 'Refunded';
+  escrow_status: 'Created' | 'Funded' | 'Released' | 'Refunded' | 'Disputed';
   github_url:    string;
   created_at:    string;
   updated_at:    string;
@@ -163,19 +163,26 @@ export interface Review {
   summary:            string;
   evidence:           string; // JSON
   client_translation?: string;
+  reviewer?:          string;
   created_at:         string;
   updated_at:         string;
 }
 
 export interface Payout {
-  id:                 string;
-  project_id:         string;
-  amount:             number;
-  release_percentage: number;
-  status:             'Pending' | 'Approved' | 'Released' | 'Refunded';
-  tx_hash?:           string;
-  created_at:         string;
-  updated_at:         string;
+  id:                    string;
+  project_id:            string;
+  amount:                number;
+  release_percentage:    number;
+  status:                'Pending' | 'Approved' | 'Released' | 'Refunded';
+  tx_hash?:              string;
+  // Razorpay Route fields
+  razorpay_order_id?:    string;
+  razorpay_payment_id?:  string;
+  razorpay_transfer_id?: string;
+  transfer_id?:          string;
+  hold_status?:          'held' | 'released' | 'reversed';
+  created_at:            string;
+  updated_at:            string;
 }
 
 export interface BlockchainTx {
@@ -188,4 +195,16 @@ export interface BlockchainTx {
   status:      'success' | 'pending' | 'reverted';
   timestamp:   string;
   gasUsed:     number;
+}
+
+// ── Razorpay payment record (shown in transaction explorer) ───────────────────
+export interface PaymentTx {
+  id:          string;   // payment_XXXXX or trf_XXXXX
+  type:        'order' | 'transfer' | 'release' | 'reversal';
+  projectId:   string;
+  amount:      number;   // INR
+  currency:    'INR';
+  status:      'created' | 'captured' | 'held' | 'released' | 'reversed' | 'failed';
+  timestamp:   string;
+  description: string;
 }

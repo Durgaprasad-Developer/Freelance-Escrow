@@ -1,0 +1,192 @@
+[
+  {
+    "id": "scenario-01",
+    "title": "Complete Authentication Flow with JWT and Unit Tests",
+    "milestones": [
+      { "title": "Implement JWT authentication endpoints and session middleware", "weight": 60 },
+      { "title": "Add unit tests covering login/signup happy & edge cases", "weight": 40 }
+    ],
+    "diff": "+ export async function POST(req: Request) { const { email, password } = await req.json(); const token = jwt.sign({ email }, SECRET); return NextResponse.json({ token }); }\n+ describe('Auth Flow', () => { it('issues valid token', async () => { ... }); });",
+    "ground_truth_score": 100,
+    "category": "Authentication"
+  },
+  {
+    "id": "scenario-02",
+    "title": "Missing Error Handling in Payment Webhook",
+    "milestones": [
+      { "title": "Parse incoming payment webhook event", "weight": 50 },
+      { "title": "Verify HMAC signature and handle error cases", "weight": 50 }
+    ],
+    "diff": "+ export async function POST(req: Request) { const event = await req.json(); await db.update(event.id); return NextResponse.json({ ok: true }); }",
+    "ground_truth_score": 50,
+    "category": "Payment Security"
+  },
+  {
+    "id": "scenario-03",
+    "title": "Partial Database Migration with No Schema Validation",
+    "milestones": [
+      { "title": "Add user preference columns to database schema", "weight": 50 },
+      { "title": "Expose update API with request body validation", "weight": 50 }
+    ],
+    "diff": "+ ALTER TABLE users ADD COLUMN theme VARCHAR(20);\n+ export async function PUT(req) { const body = await req.json(); await db.users.update(body); }",
+    "ground_truth_score": 60,
+    "category": "Backend API"
+  },
+  {
+    "id": "scenario-04",
+    "title": "Full Responsive Landing Page Implementation",
+    "milestones": [
+      { "title": "Build hero section, features grid, and pricing cards", "weight": 70 },
+      { "title": "Ensure mobile responsiveness and dark mode support", "weight": 30 }
+    ],
+    "diff": "+ export default function Hero() { return <div className='grid grid-cols-1 md:grid-cols-3 dark:bg-zinc-900'>...</div>; }",
+    "ground_truth_score": 95,
+    "category": "Frontend UI"
+  },
+  {
+    "id": "scenario-05",
+    "title": "Empty PR with Placeholder Comments Only",
+    "milestones": [
+      { "title": "Implement Redis caching layer for API responses", "weight": 100 }
+    ],
+    "diff": "+ // TODO: Add redis client here\n+ // cache logic goes here",
+    "ground_truth_score": 0,
+    "category": "Incomplete Scope"
+  },
+  {
+    "id": "scenario-06",
+    "title": "Stripe/Razorpay Settlement Hold Reversal",
+    "milestones": [
+      { "title": "Create held transfer on payment capture", "weight": 50 },
+      { "title": "Implement release and reversal handlers", "weight": 50 }
+    ],
+    "diff": "+ export async function releaseHold(id) { return await razorpay.transfers.edit(id, { on_hold: false }); }\n+ export async function reverseTransfer(id, amount) { return await razorpay.transfers.reverse(id, { amount }); }",
+    "ground_truth_score": 100,
+    "category": "Payment Gateway"
+  },
+  {
+    "id": "scenario-07",
+    "title": "Refactored Component Without Feature Addition",
+    "milestones": [
+      { "title": "Add export to PDF feature for invoice page", "weight": 100 }
+    ],
+    "diff": "- const buttonStyle = { color: 'blue' };\n+ const buttonStyle = { color: 'navy', padding: '8px' };",
+    "ground_truth_score": 0,
+    "category": "Scope Mismatch"
+  },
+  {
+    "id": "scenario-08",
+    "title": "Rate Limiting Middleware Implementation",
+    "milestones": [
+      { "title": "Implement sliding-window rate limiting middleware", "weight": 60 },
+      { "title": "Return 429 Too Many Requests response header", "weight": 40 }
+    ],
+    "diff": "+ const limiter = new RateLimiter({ points: 10, duration: 60 });\n+ if (!res.allowed) return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });",
+    "ground_truth_score": 90,
+    "category": "Middleware / Infra"
+  },
+  {
+    "id": "scenario-09",
+    "title": "Data Export Endpoint without Authentication Guard",
+    "milestones": [
+      { "title": "Create CSV export endpoint for transaction history", "weight": 50 },
+      { "title": "Enforce strict tenant authorization checks", "weight": 50 }
+    ],
+    "diff": "+ export async function GET() { const data = await db.payouts.findMany(); return new Response(toCSV(data)); }",
+    "ground_truth_score": 50,
+    "category": "Security"
+  },
+  {
+    "id": "scenario-10",
+    "title": "Complete Next.js Dynamic Routing Setup",
+    "milestones": [
+      { "title": "Implement dynamic project details route with SSR data fetching", "weight": 100 }
+    ],
+    "diff": "+ export default async function Page({ params }: { params: Promise<{ id: string }> }) { const { id } = await params; const project = await getProject(id); return <div>{project.title}</div>; }",
+    "ground_truth_score": 100,
+    "category": "Frontend Architecture"
+  },
+  {
+    "id": "scenario-11",
+    "title": "Added Hardcoded Dummy Data Instead of Real API Call",
+    "milestones": [
+      { "title": "Connect dashboard to real-time analytics API", "weight": 100 }
+    ],
+    "diff": "+ const data = [{ day: 'Mon', sales: 500 }, { day: 'Tue', sales: 700 }]; // Hardcoded mock",
+    "ground_truth_score": 25,
+    "category": "Mock Workaround"
+  },
+  {
+    "id": "scenario-12",
+    "title": "Dispute Appeal Endpoint with Audit Logging",
+    "milestones": [
+      { "title": "Build appeal submission endpoint", "weight": 50 },
+      { "title": "Record structured audit entry in database", "weight": 50 }
+    ],
+    "diff": "+ export async function POST(req) { const { projectId, reason } = await req.json(); await db.updateProject(projectId, { escrow_status: 'Disputed' }); await db.createReview(projectId, { summary: reason }); }",
+    "ground_truth_score": 95,
+    "category": "Dispute Engine"
+  },
+  {
+    "id": "scenario-13",
+    "title": "Broken Imports Causing Build Failure",
+    "milestones": [
+      { "title": "Integrate chart library for user activity graph", "weight": 100 }
+    ],
+    "diff": "+ import { NonExistentChart } from 'invalid-package-name';\n+ export default function Chart() { return <NonExistentChart />; }",
+    "ground_truth_score": 10,
+    "category": "Build Failure"
+  },
+  {
+    "id": "scenario-14",
+    "title": "Webhooks Handler with Signature Validation",
+    "milestones": [
+      { "title": "Implement HMAC SHA256 webhook signature verification", "weight": 100 }
+    ],
+    "diff": "+ export function verifySignature(body, sig, secret) { const expected = crypto.createHmac('sha256', secret).update(body).digest('hex'); return expected === sig; }",
+    "ground_truth_score": 100,
+    "category": "Security"
+  },
+  {
+    "id": "scenario-15",
+    "title": "Partial UI Component without Event Handler",
+    "milestones": [
+      { "title": "Create filter tabs for project status", "weight": 50 },
+      { "title": "Wire filter selection to update list data", "weight": 50 }
+    ],
+    "diff": "+ export function FilterBar() { return <button onClick={() => {}}>Filter</button>; }",
+    "ground_truth_score": 50,
+    "category": "Frontend UI"
+  },
+  {
+    "id": "scenario-16",
+    "title": "Environment Variable Configuration with Production Guards",
+    "milestones": [
+      { "title": "Setup central environment config with validation schema", "weight": 100 }
+    ],
+    "diff": "+ const KEY = process.env.RAZORPAY_KEY_ID || throw new Error('Missing RAZORPAY_KEY_ID');",
+    "ground_truth_score": 90,
+    "category": "Configuration"
+  },
+  {
+    "id": "scenario-17",
+    "title": "Unit Test Suite for Milestone Scoring Agent",
+    "milestones": [
+      { "title": "Write unit tests for milestone score calculation", "weight": 100 }
+    ],
+    "diff": "+ describe('MilestoneScorer', () => { it('calculates weighted score correctly', () => { expect(score).toBe(85); }); });",
+    "ground_truth_score": 95,
+    "category": "Testing"
+  },
+  {
+    "id": "scenario-18",
+    "title": "SQL Injection Risk in Unsanitized Query",
+    "milestones": [
+      { "title": "Implement search endpoint for projects", "weight": 50 },
+      { "title": "Sanitize input query parameters", "weight": 50 }
+    ],
+    "diff": "+ export async function GET(req) { const query = req.url.searchParams.get('q'); return db.query(`SELECT * FROM projects WHERE title LIKE '%${query}%'`); }",
+    "ground_truth_score": 40,
+    "category": "Security Vulnerability"
+  }
+]

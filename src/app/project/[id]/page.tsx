@@ -26,7 +26,7 @@ import type { Project, Milestone, Review, Payout } from '@/lib/types';
 
 type PageData = { project: Project; milestones: Milestone[]; repository: any; reviews: Review[]; payouts: Payout[] };
 
-function fmt$(n: number) { return n.toLocaleString('en-US') + ' MON'; }
+function fmt$(n: number) { return '₹' + n.toLocaleString('en-IN'); }
 
 function scoreColor(s: number) {
   return s === 0 ? 'var(--border)' : s >= 80 ? 'var(--success)' : s >= 50 ? 'var(--sand)' : 'var(--warning)';
@@ -119,10 +119,40 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const [reportView,     setReportView]     = useState<'client' | 'technical'>('client');
   const [showExplainModal, setShowExplainModal] = useState(false);
   const [showReportDetails, setShowReportDetails] = useState(false);
+  const [showAppealModal,  setShowAppealModal]  = useState(false);
+  const [appealReason,     setAppealReason]     = useState('');
+  const [appealAction,     setAppealAction]     = useState<'request_human_review' | 'override_approve' | 'override_refund'>('request_human_review');
+  const [submittingAppeal, setSubmittingAppeal] = useState(false);
 
   // Collapsible diagnostics state for technical report
   const [expandReasoning, setExpandReasoning] = useState(true);
   const [expandFiles,     setExpandFiles]     = useState(true);
+
+  async function handleAppealSubmit() {
+    if (!appealReason.trim()) return;
+    setSubmittingAppeal(true);
+    try {
+      const res = await fetch('/api/appeal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: id,
+          reason: appealReason,
+          requestedAction: appealAction,
+          role: 'client',
+        }),
+      });
+      if (res.ok) {
+        setShowAppealModal(false);
+        setAppealReason('');
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingAppeal(false);
+    }
+  }
 
   async function fetchData() {
     const r = await fetch(`/api/projects/${id}`);
@@ -343,30 +373,40 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   </div>
                 </div>
 
-                {latestPendingPayout && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                    <button
-                      id={`refund-${latestPendingPayout.id}`}
-                      onClick={() => handlePayout(latestPendingPayout.id, 'refund')}
-                      disabled={!!releasingId}
-                      className="btn-secondary"
-                      style={{ padding: '9px 18px', fontWeight: 600 }}
-                    >
-                      {releasingId === latestPendingPayout.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <><RotateCcw className="w-3.5 h-3.5" /> Reject & Request Revisions</>}
-                    </button>
-                    <button
-                      id={`approve-${latestPendingPayout.id}`}
-                      onClick={() => handlePayout(latestPendingPayout.id, 'approve')}
-                      disabled={!!releasingId}
-                      className="btn-success"
-                      style={{ padding: '9px 24px', fontWeight: 800, background: 'var(--success)', color: '#fff', border: 'none' }}
-                    >
-                      {releasingId === latestPendingPayout.id
-                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Confirming Settlement…</>
-                        : <><CheckCircle className="w-4.5 h-4.5" /> Approve & Release {fmt$(releaseAmt)}</>}
-                    </button>
-                  </div>
-                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 18, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                  <button
+                    onClick={() => setShowAppealModal(true)}
+                    className="btn-ghost"
+                    style={{ padding: '8px 14px', fontSize: 12.5, color: 'var(--warning)', fontWeight: 600 }}
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" /> Appeal Verdict / Human Override
+                  </button>
+
+                  {latestPendingPayout && (
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button
+                        id={`refund-${latestPendingPayout.id}`}
+                        onClick={() => handlePayout(latestPendingPayout.id, 'refund')}
+                        disabled={!!releasingId}
+                        className="btn-secondary"
+                        style={{ padding: '9px 18px', fontWeight: 600 }}
+                      >
+                        {releasingId === latestPendingPayout.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <><RotateCcw className="w-3.5 h-3.5" /> Reject & Request Revisions</>}
+                      </button>
+                      <button
+                        id={`approve-${latestPendingPayout.id}`}
+                        onClick={() => handlePayout(latestPendingPayout.id, 'approve')}
+                        disabled={!!releasingId}
+                        className="btn-success"
+                        style={{ padding: '9px 24px', fontWeight: 800, background: 'var(--success)', color: '#fff', border: 'none' }}
+                      >
+                        {releasingId === latestPendingPayout.id
+                          ? <><Loader2 className="w-4 h-4 animate-spin" /> Confirming Settlement…</>
+                          : <><CheckCircle className="w-4.5 h-4.5" /> Approve & Release {fmt$(releaseAmt)}</>}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -828,6 +868,129 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
             <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
               <button onClick={() => setShowExplainModal(false)} className="btn-primary" style={{ padding: '8px 20px', fontSize: 13 }}>
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Appeal & Human Override Modal */}
+      {showAppealModal && (
+        <div
+          onClick={() => setShowAppealModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(47, 47, 47, 0.4)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20
+          }}
+          className="animate-fade-in"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid var(--border)',
+              borderRadius: 16,
+              width: '100%',
+              maxWidth: 540,
+              padding: 28,
+              boxShadow: '0 12px 40px rgba(47, 47, 47, 0.12)',
+            }}
+            className="animate-slide-up"
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 9.5, color: 'var(--warning)', fontWeight: 700, fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>Human In The Loop</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', fontFamily: '"Playfair Display", Georgia, serif', margin: 0 }}>Appeal Verdict / Request Override</h3>
+              </div>
+              <button onClick={() => setShowAppealModal(false)} className="btn-ghost" style={{ padding: '4px 8px', fontSize: 18, color: 'var(--subtle)', border: 'none', cursor: 'pointer' }}>
+                &times;
+              </button>
+            </div>
+
+            <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 20, fontFamily: 'Inter, sans-serif' }}>
+              If you believe the AI verdict miscalculated milestone completion or scope changed, you can submit an appeal or execute a human override decision.
+            </p>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8, fontFamily: 'Inter, sans-serif' }}>
+                Requested Action
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { id: 'request_human_review', label: '⚖️ Request Human Mediation (Hold Funds)', desc: 'Puts project in Disputed status for neutral review' },
+                  { id: 'override_approve', label: '✅ Human Override: Release Funds', desc: 'Manually approve full payment via Razorpay Route' },
+                  { id: 'override_refund', label: '🔄 Human Override: Refund Client', desc: 'Manually reverse transfer back to client' },
+                ].map(opt => (
+                  <label
+                    key={opt.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      border: `1px solid ${appealAction === opt.id ? 'var(--accent)' : 'var(--border)'}`,
+                      background: appealAction === opt.id ? 'var(--sand-soft)' : 'var(--bg)',
+                      cursor: 'pointer',
+                      fontSize: 12.5,
+                      fontFamily: 'Inter, sans-serif',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="appealAction"
+                      checked={appealAction === opt.id}
+                      onChange={() => setAppealAction(opt.id as any)}
+                      style={{ marginTop: 2 }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--text)' }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--subtle)', marginTop: 2 }}>{opt.desc}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>
+                Reason / Additional Context
+              </label>
+              <textarea
+                value={appealReason}
+                onChange={e => setAppealReason(e.target.value)}
+                placeholder="Explain why the AI verdict is disputed or why this override is being made..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: '1px solid var(--border)',
+                  fontSize: 13,
+                  fontFamily: 'Inter, sans-serif',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+              <button onClick={() => setShowAppealModal(false)} className="btn-secondary" style={{ padding: '8px 16px', fontSize: 13 }}>
+                Cancel
+              </button>
+              <button
+                onClick={handleAppealSubmit}
+                disabled={submittingAppeal || !appealReason.trim()}
+                className="btn-primary"
+                style={{ padding: '8px 20px', fontSize: 13, background: 'var(--warning)', borderColor: 'var(--warning)' }}
+              >
+                {submittingAppeal ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Appeal'}
               </button>
             </div>
           </div>

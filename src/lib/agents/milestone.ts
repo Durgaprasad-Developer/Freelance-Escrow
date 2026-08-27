@@ -54,7 +54,8 @@ Return ONLY a JSON object with this exact shape:
   const userPrompt = `Milestones, Expected Features, and Code Verification:
 ${milestones.map(m => {
   const proof = findFuzzyMatch(m.title, evidence) || { files: [], commits: [], status: 'missing' };
-  const parts = m.description.split('\n---TECHNICAL_FEATURES---\n');
+  const desc = m.description || '';
+  const parts = desc.split('\n---TECHNICAL_FEATURES---\n');
   const clientDesc = parts[0] || '';
   const expectedTech = parts[1] || 'General structure';
   
