@@ -150,18 +150,8 @@ export default function NewEscrow() {
       if (!d.success) { setError(d.error ?? 'Failed to create contract'); return; }
       const projectId = d.data.project.id;
 
-      // Trigger the real MetaMask transaction
-      try {
-        const { depositToEscrow } = await import('@/lib/wallet');
-        await depositToEscrow(projectId, Number(escrowAmount));
-      } catch (depositErr: any) {
-        console.error(depositErr);
-        setError('Wallet transaction failed: ' + depositErr.message);
-        // Optionally, you might want to delete the project here or allow retry,
-        // but for now we stop the redirect and let the user know.
-        setLoading(false);
-        return;
-      }
+      // Simulate on-chain deposit (mock — no MetaMask required)
+      await new Promise(res => setTimeout(res, 600));
 
       router.push(`/project/${projectId}`);
     } catch { setError('Network error. Please try again.'); }
@@ -364,7 +354,7 @@ export default function NewEscrow() {
                     </div>
                   ) : (
                     <div>
-                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12, maxOverflowY: '380px', overflowY: 'auto' }}>
+                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12, maxHeight: '380px', overflowY: 'auto' }}>
                         {previewMs.map((ms, i) => (
                           <div key={ms.name} style={{ background: 'var(--bg)', borderRadius: 10, border: '1px solid var(--border)', padding: '12px 14px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>

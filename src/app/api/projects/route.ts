@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db }              from '@/lib/db';
 import { runPlannerAgent } from '@/lib/agents/planner';
-import { blockchain }      from '@/lib/blockchain';
 
 export async function GET() {
   try {

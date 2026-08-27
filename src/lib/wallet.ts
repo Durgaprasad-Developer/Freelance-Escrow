@@ -1,47 +1,35 @@
-import { createWalletClient, custom, parseEther, createPublicClient, http } from 'viem';
-import { monadTestnet } from 'viem/chains';
+// ─────────────────────────────────────────────────────────────────────────────
+// wallet.ts — Mock wallet layer (replaces real MetaMask / viem integration)
+//
+// No MetaMask, no window.ethereum, no on-chain calls.
+// Returns realistic fake data so the full app works without a browser wallet.
+// ─────────────────────────────────────────────────────────────────────────────
 
-import { ESCROW_CONTRACT_ABI, ESCROW_CONTRACT_ADDRESS  } from './contractABI';
-
+/** Simulate connecting a wallet — returns a fake address instantly */
 export async function connectWallet() {
-  if (typeof window === 'undefined' || !window.ethereum) {
-    throw new Error('MetaMask is not installed');
-  }
-
-  const walletClient = createWalletClient({
-    chain: monadTestnet,
-    transport: custom(window.ethereum)
-  });
-
-  const [address] = await walletClient.requestAddresses();
-
-  return { walletClient, address };
+  await _delay(300);
+  const address = '0xMockClient0000000000000000000000000000000' as `0x${string}`;
+  return { address };
 }
 
-export async function depositToEscrow(projectId: string, amountEth: number) {
-  if (typeof window === 'undefined' || !window.ethereum) {
-    throw new Error('MetaMask is not installed');
-  }
+/**
+ * Simulate depositing funds into the escrow contract.
+ * Returns a fake transaction hash — no MetaMask popup, no network call.
+ */
+export async function depositToEscrow(
+  projectId: string,
+  amountEth: number,
+): Promise<{ hash: `0x${string}`; receipt: { status: 'success' } }> {
+  await _delay(600);
+  const hash = `0x${Array.from({ length: 64 }, () =>
+    Math.floor(Math.random() * 16).toString(16)
+  ).join('')}` as `0x${string}`;
 
-  const { walletClient, address } = await connectWallet();
-  const publicClient = createPublicClient({
-    chain:  monadTestnet,
-    transport: custom(window.ethereum)
-  });
+  console.info(`[mock wallet] depositToEscrow — project: ${projectId}, amount: ${amountEth} MON, hash: ${hash}`);
 
-  const amountWei = parseEther(amountEth.toString());
+  return { hash, receipt: { status: 'success' } };
+}
 
-  const { request } = await publicClient.simulateContract({
-    account: address,
-    address: ESCROW_CONTRACT_ADDRESS,
-    abi: ESCROW_CONTRACT_ABI,
-    functionName: 'deposit',
-    args: [projectId],
-    value: amountWei,
-  });
-
-  const hash = await walletClient.writeContract(request);
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  return { hash, receipt };
+function _delay(ms: number) {
+  return new Promise<void>(res => setTimeout(res, ms));
 }
