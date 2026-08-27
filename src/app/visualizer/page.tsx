@@ -413,7 +413,7 @@ function VisualizerContent() {
                   <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>AI Verification Succeeded</span>
                 </div>
                 <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 16, fontFamily: 'Inter' }}>
-                  The assembly verified <strong style={{ color: 'var(--success)' }}>{pipeState.paymentResult.completionPercentage}%</strong> of deliverables. recommended payout of <strong style={{ color: 'var(--accent)' }}>{pipeState.paymentResult.recommendedRelease} MON</strong> is pending approval.
+                  The assembly verified <strong style={{ color: 'var(--success)' }}>{pipeState.paymentResult.completionPercentage}%</strong> of deliverables. recommended payout of <strong style={{ color: 'var(--accent)' }}>₹{pipeState.paymentResult.recommendedRelease}</strong> is pending approval.
                 </p>
                 <Link href={`/project/${projectId}`} className="btn-primary" style={{ fontSize: 13, width: '100%', justifyContent: 'center' }}>
                   Review Settlement & Release Funds

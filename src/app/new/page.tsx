@@ -306,7 +306,7 @@ export default function NewEscrow() {
                       </div>
                     </div>
                     <div>
-                      <label className="form-label">Escrow Budget (MON) <span style={{ color: 'var(--error)' }}>*</span></label>
+                      <label className="form-label">Escrow Budget (INR ₹) <span style={{ color: 'var(--error)' }}>*</span></label>
                       <input
                         id="escrow-amount"
                         type="number"

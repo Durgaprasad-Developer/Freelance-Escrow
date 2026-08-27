@@ -17,7 +17,7 @@ import { KpiCard, StatusBadge, ScoreRing, SkeletonKpi, EmptyState } from '@/comp
 import type { Project } from '@/lib/types';
 
 function fmt$(n: number) {
-  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' MON';
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 export default function Dashboard() {
