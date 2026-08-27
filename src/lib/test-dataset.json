@@ -188,5 +188,55 @@
     "diff": "+ export async function GET(req) { const query = req.url.searchParams.get('q'); return db.query(`SELECT * FROM projects WHERE title LIKE '%${query}%'`); }",
     "ground_truth_score": 40,
     "category": "Security Vulnerability"
+  },
+  {
+    "id": "scenario-19",
+    "title": "Adversarial: Diff Padding with 500 Lines of Comments",
+    "milestones": [
+      { "title": "Implement Redis session store", "weight": 100 }
+    ],
+    "diff": "+ // Cache line 1\n+ // Cache line 2\n+ // TODO: Redis connect here\n+ // Cache line 3\n+ // Cache line 4\n+ // TODO: Redis connect here\n",
+    "ground_truth_score": 10,
+    "category": "Adversarial Gaming"
+  },
+  {
+    "id": "scenario-20",
+    "title": "Adversarial: Hidden SQL Injection in Clean Query Handler",
+    "milestones": [
+      { "title": "Implement secure user query endpoint", "weight": 100 }
+    ],
+    "diff": "+ export async function GET(req: Request) { const name = req.url.searchParams.get('name'); return await db.query(`SELECT * FROM users WHERE name = '${name}'`); }",
+    "ground_truth_score": 40,
+    "category": "Adversarial Vulnerability"
+  },
+  {
+    "id": "scenario-21",
+    "title": "Adversarial: Unrelated CSS Refactor Submitted for API Milestone",
+    "milestones": [
+      { "title": "Build Webhook Endpoint for Payment Processing", "weight": 100 }
+    ],
+    "diff": "+ body { background-color: #000; color: #fff; padding: 20px; font-family: sans-serif; }",
+    "ground_truth_score": 0,
+    "category": "Adversarial Mismatch"
+  },
+  {
+    "id": "scenario-22",
+    "title": "Adversarial: Vague Milestone Spec ('Make App Fast')",
+    "milestones": [
+      { "title": "Optimize performance and fix bugs", "weight": 100 }
+    ],
+    "diff": "+ const optimized = true;\n+ console.log('Performance improved');",
+    "ground_truth_score": 25,
+    "category": "Adversarial Ambiguity"
+  },
+  {
+    "id": "scenario-23",
+    "title": "Adversarial: Syntax Error / Unclosed Bracket in Core Handler",
+    "milestones": [
+      { "title": "Implement Order Settlement Logic", "weight": 100 }
+    ],
+    "diff": "+ export function settleOrder(orderId) { if (orderId) { razorpay.settle(orderId); // missing closing bracket",
+    "ground_truth_score": 15,
+    "category": "Adversarial Syntax Error"
   }
 ]

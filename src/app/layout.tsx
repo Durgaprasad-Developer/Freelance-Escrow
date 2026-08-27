@@ -8,8 +8,8 @@ export const metadata: Metadata = {
     template: '%s | krow',
   },
   description:
-    'krow is an AI-powered trustless escrow platform for freelance software development. Verify GitHub milestones automatically and release smart contract payments with confidence.',
-  keywords: ['escrow', 'AI verification', 'freelance', 'GitHub', 'Monad', 'smart contract', 'web3', 'krow'],
+    'krow is an AI-powered escrow platform for freelance software development. Verify GitHub milestones automatically and release payments via Razorpay Route.',
+  keywords: ['escrow', 'AI verification', 'freelance', 'GitHub', 'Razorpay Route', 'INR payments', 'krow'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -374,7 +374,7 @@ export default function NewEscrow() {
                 <div className="card" style={{ padding: '16px 20px', background: 'var(--bg-card)' }}>
                   <div className="sect-label">Contract Protocol</div>
                   {[
-                    { icon: Lock, t: 'Funds Locked', d: 'Budget held in Monad Smart Escrow Contract.' },
+                    { icon: Lock, t: 'Funds Locked', d: 'Budget held securely in Razorpay Route Escrow Account.' },
                     { icon: Bot, t: 'AI Audited', d: 'Verification agents audit deliverables on PR.' },
                     { icon: Banknote, t: 'Instant Payout', d: 'Contract unlocks funds automatically on success.' },
                   ].map((f, i) => {

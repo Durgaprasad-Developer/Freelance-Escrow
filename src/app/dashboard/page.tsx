@@ -208,11 +208,11 @@ export default function Dashboard() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 20 }}>
                 {[
-                  { n: '01', t: 'Draft Escrow', d: 'Client locks budget on Monad Devnet.' },
-                  { n: '02', t: 'Smart Lock Active', d: 'Smart escrow contract monitors work.' },
-                  { n: '03', t: 'GitHub Checkpoint', d: 'Developer triggers webhooks on PR.' },
-                  { n: '04', t: 'AI Audits Trait', d: 'Specialized agents verify milestones.' },
-                  { n: '05', t: 'Payout Dispatched', d: 'Instant smart contract settlement.' },
+                  { n: '01', t: 'Deposit Escrow', d: 'Client locks budget via Razorpay Route in INR.' },
+                  { n: '02', t: 'Settlement Hold', d: 'Route transfer is held on sub-account.' },
+                  { n: '03', t: 'GitHub Checkpoint', d: 'Developer submits PR on repository.' },
+                  { n: '04', t: '6-Agent Verification', d: 'AI agents score milestones from diff.' },
+                  { n: '05', t: 'Automated Payout', d: 'Instant release or refund based on score.' },
                 ].map((step, i) => (
                   <div key={step.n} style={{ position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
