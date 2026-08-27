@@ -7,7 +7,7 @@ import {
   FolderKanban,
   Bot,
   Plus,
-  Wallet,
+  ShieldCheck,
   Zap,
 } from 'lucide-react';
 
@@ -17,57 +17,24 @@ const navItems = [
   { href: '/visualizer', icon: Bot,             label: 'Verification Center' },
 ];
 
-function WalletButton() {
-  const [address, setAddress] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getAddress = async () => {
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
-        if (accounts && accounts.length > 0) {
-          setAddress(accounts[0]);
-        }
-      }
-    };
-    getAddress();
-
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length > 0) {
-        setAddress(accounts[0]);
-      } else {
-        setAddress(null);
-      }
-    };
-
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      (window as any).ethereum.on('accountsChanged', handleAccountsChanged);
-    }
-
-    return () => {
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        (window as any).ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      }
-    };
-  }, []);
-
-  const handleConnect = async () => {
-    try {
-      const { connectWallet } = await import('@/lib/wallet');
-      const { address: addr } = await connectWallet();
-      setAddress(addr);
-    } catch (e: any) {
-      alert('Failed to connect wallet: ' + e.message);
-    }
-  };
-
+function RazorpayStatusButton() {
   return (
-    <button
-      className="wallet-btn"
-      onClick={handleConnect}
-    >
-      <Wallet className="w-3.5 h-3.5 flex-shrink-0" />
-      <span>{address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}</span>
-    </button>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      padding: '8px 12px',
+      borderRadius: 8,
+      background: 'rgba(51, 149, 255, 0.1)',
+      border: '1px solid rgba(51, 149, 255, 0.25)',
+      color: '#3395ff',
+      fontSize: 12,
+      fontWeight: 600,
+      fontFamily: 'Inter, sans-serif'
+    }}>
+      <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+      <span>Razorpay Route Active</span>
+    </div>
   );
 }
 
@@ -121,23 +88,23 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Bottom — status + wallet */}
+      {/* Bottom — status + gateway */}
       <div className="sb-bottom">
         {/* Network status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 4px 9px', marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>Monad Devnet</span>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>Razorpay Route</span>
           <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--success)', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
         </div>
 
         {/* AI Engine */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 4px 10px', marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
           <Zap className="w-3.5 h-3.5" style={{ color: 'var(--warning)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>AI Engine</span>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 500 }}>AI Audit Engine</span>
           <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--warning)', fontWeight: 600, letterSpacing: '0.04em' }}>READY</span>
         </div>
 
-        <WalletButton />
+        <RazorpayStatusButton />
       </div>
     </aside>
   );

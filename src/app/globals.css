@@ -12,63 +12,63 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
-/* ── CSS Custom Properties ── */
+/* ── CSS Custom Properties — Razorpay Theme ── */
 :root {
-  /* Palette */
-  --sand:    #D3B9A2;
-  --accent:  #8B6F5A;
-  --bg:      #F7F4F1;
-  --bg-alt:  #EFE5DB;
+  /* Palette — Razorpay Electric Blue Theme */
+  --sand:    #3395FF;
+  --accent:  #0284C7;
+  --bg:      #F4F7FB;
+  --bg-alt:  #E8EEF5;
   --bg-card: #FFFFFF;
-  --border:  #DCCABB;
-  --text:    #2F2F2F;
-  --muted:   #4E4E4E;   /* Increased contrast from #666666 */
-  --subtle:  #6B5A4B;   /* Increased contrast from #9C8A7A */
-  --success: #3E5A41;   /* Darker success green for text/badges in light mode */
-  --warning: #A1763A;   /* Darker warning gold for text/badges in light mode */
-  --error:   #943E3E;   /* Darker error red for text/badges in light mode */
+  --border:  #D0DCED;
+  --text:    #0C1929;
+  --muted:   #334155;
+  --subtle:  #64748B;
+  --success: #16A34A;
+  --warning: #D97706;
+  --error:   #DC2626;
 
   /* Derived */
-  --sand-soft:   rgba(211,185,162,0.18);
-  --accent-soft: rgba(139,111,90,0.10);
-  --success-soft: rgba(62,90,65,0.10);
-  --warning-soft: rgba(161,118,58,0.10);
-  --error-soft:   rgba(148,62,62,0.08);
+  --sand-soft:   rgba(51,149,255,0.12);
+  --accent-soft: rgba(2,132,199,0.10);
+  --success-soft: rgba(22,163,74,0.10);
+  --warning-soft: rgba(217,119,6,0.10);
+  --error-soft:   rgba(220,38,38,0.08);
 
   /* Payout Verdict Component Tokens */
-  --success-border: rgba(62,90,65,0.3);
-  --success-icon:   #3E5A41;
-  --error-border:   rgba(148,62,62,0.3);
-  --error-icon:     #943E3E;
+  --success-border: rgba(22,163,74,0.3);
+  --success-icon:   #16A34A;
+  --error-border:   rgba(220,38,38,0.3);
+  --error-icon:     #DC2626;
 
   /* Badge Custom Tokens - Light Mode */
-  --badge-green-text: #2c4430;
-  --badge-green-bg: rgba(62,90,65,0.10);
-  --badge-green-border: rgba(62,90,65,0.35);
+  --badge-green-text: #15803D;
+  --badge-green-bg: rgba(22,163,74,0.10);
+  --badge-green-border: rgba(22,163,74,0.35);
   
-  --badge-amber-text: #7b4f17;
-  --badge-amber-bg: rgba(161,118,58,0.10);
-  --badge-amber-border: rgba(161,118,58,0.35);
+  --badge-amber-text: #B45309;
+  --badge-amber-bg: rgba(217,119,6,0.10);
+  --badge-amber-border: rgba(217,119,6,0.35);
   
-  --badge-red-text: #782626;
-  --badge-red-bg: rgba(148,62,62,0.08);
-  --badge-red-border: rgba(148,62,62,0.35);
+  --badge-red-text: #B91C1C;
+  --badge-red-bg: rgba(220,38,38,0.08);
+  --badge-red-border: rgba(220,38,38,0.35);
   
-  --badge-sand-text: #503d30;
-  --badge-sand-bg: rgba(211,185,162,0.18);
-  --badge-sand-border: rgba(139,111,90,0.35);
+  --badge-sand-text: #0284C7;
+  --badge-sand-bg: rgba(51,149,255,0.12);
+  --badge-sand-border: rgba(51,149,255,0.35);
   
-  --badge-gray-text: #333333;
-  --badge-gray-bg: rgba(239,229,219,0.4);
+  --badge-gray-text: #334155;
+  --badge-gray-bg: rgba(232,238,245,0.5);
   --badge-gray-border: var(--border);
 
   /* Buttons */
-  --btn-primary-bg:     var(--text);
+  --btn-primary-bg:     #3395FF;
   --btn-primary-text:   #FFFFFF;
-  --btn-primary-shadow: 0 4px 14px rgba(47,47,47,0.15);
+  --btn-primary-shadow: 0 4px 14px rgba(51,149,255,0.35);
 
   /* Topbar */
-  --topbar-bg: rgba(247,244,241,0.92);
+  --topbar-bg: rgba(244,247,251,0.92);
 
   /* Sidebar */
   --sidebar-w: 232px;
@@ -81,23 +81,23 @@ html { scroll-behavior: smooth; }
 }
 
 .dark {
-  /* Palette */
-  --sand:    #D3B9A2;
-  --accent:  #E2D1C3;
-  --bg:      #0B0F14;
-  --bg-alt:  #111827;
-  --bg-card: #161B22;
-  --border:  #2A3441;
+  /* Palette — Razorpay Deep Dark Mode */
+  --sand:    #3395FF;
+  --accent:  #38BDF8;
+  --bg:      #070B12;
+  --bg-alt:  #0F172A;
+  --bg-card: #111B2D;
+  --border:  #1E293B;
   --text:    #F8FAFC;
-  --muted:   #A2B4C7;   /* Increased contrast from #94A3B8 */
-  --subtle:  #7E8F9F;   /* Increased contrast from #627288 */
+  --muted:   #94A3B8;
+  --subtle:  #64748B;
   --success: #22C55E;
   --warning: #F59E0B;
   --error:   #EF4444;
 
   /* Derived */
-  --sand-soft:    rgba(211,185,162,0.12);
-  --accent-soft:  rgba(226,209,195,0.08);
+  --sand-soft:    rgba(51,149,255,0.14);
+  --accent-soft:  rgba(56,189,248,0.10);
   --success-soft: rgba(34,197,94,0.12);
   --warning-soft: rgba(245,158,11,0.12);
   --error-soft:   rgba(239,68,68,0.10);
@@ -121,21 +121,21 @@ html { scroll-behavior: smooth; }
   --badge-red-bg: rgba(239,68,68,0.12);
   --badge-red-border: rgba(239,68,68,0.4);
   
-  --badge-sand-text: #e2d1c3;
-  --badge-sand-bg: rgba(211,185,162,0.12);
-  --badge-sand-border: rgba(211,185,162,0.4);
+  --badge-sand-text: #38bdf8;
+  --badge-sand-bg: rgba(51,149,255,0.14);
+  --badge-sand-border: rgba(51,149,255,0.4);
   
   --badge-gray-text: #e2e8f0;
-  --badge-gray-bg: rgba(30, 41, 59, 0.6);
+  --badge-gray-bg: rgba(15, 23, 42, 0.6);
   --badge-gray-border: var(--border);
 
   /* Buttons */
-  --btn-primary-bg:     #F8FAFC;
-  --btn-primary-text:   #0B0F14;
-  --btn-primary-shadow: 0 4px 14px rgba(0,0,0,0.45);
+  --btn-primary-bg:     #3395FF;
+  --btn-primary-text:   #FFFFFF;
+  --btn-primary-shadow: 0 4px 14px rgba(51,149,255,0.45);
 
   /* Topbar */
-  --topbar-bg: rgba(11,15,20,0.92);
+  --topbar-bg: rgba(7,11,18,0.92);
 }
 
 body {

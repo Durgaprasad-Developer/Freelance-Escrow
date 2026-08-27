@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       github_url:    github_url ?? '',
     });
 
-    // Monad contract deposit is now handled client-side via MetaMask after project creation
+    // Escrow payment deposit is handled via Razorpay Checkout after project creation
 
     // Auto-generate milestones via Planner Agent
     const plan = await runPlannerAgent(description);
