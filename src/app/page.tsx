@@ -78,7 +78,7 @@ const AGENTS = [
   { icon: Flag, label: 'Milestone Agent', role: 'Completion Scorer', desc: 'Grades each milestone 0–100% from the extracted evidence.', bg: 'var(--bg-alt)', color: 'var(--success)' },
   { icon: ShieldCheck, label: 'Verify Agent', role: 'Quality Auditor', desc: 'Cross-checks code quality against the original contract requirements.', bg: 'var(--bg)', color: 'var(--accent)' },
   { icon: ClipboardCheck, label: 'Report Agent', role: 'Audit Compiler', desc: 'Generates a structured markdown report for both client and developer.', bg: 'var(--bg)', color: 'var(--error)' },
-  { icon: Banknote, label: 'Payment Agent', role: 'Payout Arbitrator', desc: 'Computes the weighted escrow release and stages smart contract execution.', bg: 'var(--bg-alt)', color: 'var(--warning)' },
+  { icon: Banknote, label: 'Payment Agent', role: 'Payout Arbitrator', desc: 'Computes the weighted escrow release and triggers Razorpay Route settlement.', bg: 'var(--bg-alt)', color: 'var(--warning)' },
 ];
 
 const PROBLEMS = ['Subjective "this isn\'t done" disputes', 'Payment delayed weeks after delivery', 'Client ghosts after receiving the work', 'No evidence-based way to prove completion', 'Zero recourse for the developer'];
@@ -530,12 +530,12 @@ export default function LandingPage() {
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                 Launch App <ArrowRight className="w-4 h-4" />
               </Link>
-              <a href="https://github.com" target="_blank" rel="noreferrer"
+              <Link href="/visualizer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '14px 28px', borderRadius: 10, background: 'transparent', color: 'var(--muted)', textDecoration: 'none', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, border: '1px solid var(--border)', transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--sand-soft)'; e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--sand)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
-                <Github className="w-4 h-4" /> Read Documentation
-              </a>
+                <Bot className="w-4 h-4" /> Verification Center
+              </Link>
             </div>
           </FadeSection>
         </div>
@@ -558,10 +558,9 @@ export default function LandingPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             {[
-              { l: 'GitHub', h: 'https://github.com' },
-              { l: 'Twitter', h: 'https://twitter.com' },
-              { l: 'Docs', h: '#' },
-              { l: 'Launch App', h: '/dashboard' },
+              { l: 'New Escrow', h: '/new' },
+              { l: 'Dashboard', h: '/dashboard' },
+              { l: 'Verification Center', h: '/visualizer' },
             ].map(link => (
               <a key={link.l} href={link.h} style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.15s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}

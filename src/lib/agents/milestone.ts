@@ -19,6 +19,27 @@ export function findFuzzyMatch(key: string, obj: Record<string, any>): any | nul
   return null;
 }
 
+export function detectCodeRedFlags(content: string): { flagged: boolean; reason?: string } {
+  if (!content || content.trim().length === 0) {
+    return { flagged: true, reason: 'File is empty or missing.' };
+  }
+  
+  if (/\beval\s*\(/.test(content) || /new\s+Function\s*\(/.test(content)) {
+    return { flagged: true, reason: 'Security hazard: dynamic execution pattern (eval / Function) detected.' };
+  }
+
+  if (/(SELECT|INSERT|UPDATE|DELETE)\s+[\s\S]*?\+/.test(content) && /WHERE|VALUES/i.test(content)) {
+    return { flagged: true, reason: 'Security hazard: unvalidated SQL string concatenation detected.' };
+  }
+
+  const stripped = content.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim();
+  if (stripped.length < 25) {
+    return { flagged: true, reason: 'Code quality failure: file contains comments or stubs without implementation.' };
+  }
+
+  return { flagged: false };
+}
+
 export async function runMilestoneAgent(
   milestones: { title: string; weight: number; description: string }[],
   evidence:   Record<string, MilestoneEvidence>,
@@ -85,8 +106,31 @@ ${codeSnippets}
       const parsed = JSON.parse(raw);
       if (parsed.scores) {
         const milestoneScores: MilestoneScore[] = milestones.map(m => {
+          const proof = findFuzzyMatch(m.title, evidence) || { files: [], status: 'missing' };
           const match = findFuzzyMatch(m.title, parsed.scores) || { completion: 65, status: 'Partial', reasoning: 'Evidence found but LLM could not score directly — marking as Partial.' };
-          const completion = Math.min(100, Math.max(0, Number(match.completion) || 65));
+          
+          let guardReason: string | null = null;
+          if (proof.files && fileContents) {
+            for (const f of proof.files) {
+              const code = fileContents[f];
+              if (code !== undefined) {
+                const check = detectCodeRedFlags(code);
+                if (check.flagged) {
+                  guardReason = check.reason ?? 'Flagged by Code Guard.';
+                  break;
+                }
+              }
+            }
+          }
+
+          let completion = Math.min(100, Math.max(0, Number(match.completion) || 65));
+          let reasoning = match.reasoning || 'Audit evaluation complete.';
+
+          if (guardReason) {
+            completion = Math.min(completion, 15);
+            reasoning = `[CODE GUARD FLAGGED: ${guardReason}] ${reasoning}`;
+          }
+
           let status: MilestoneScore['status'] = 'Not Started';
           if (completion >= 81) status = 'Completed';
           else if (completion >= 21) status = 'Partial';
@@ -95,7 +139,7 @@ ${codeSnippets}
             title: m.title,
             completion,
             status,
-            reasoning: match.reasoning || 'Audit evaluation complete.',
+            reasoning,
           };
         });
 

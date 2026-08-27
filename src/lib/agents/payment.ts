@@ -73,8 +73,8 @@ ${milestoneScores.map(s => `- ${s.title}: ${s.completion}% (${s.status})`).join(
       if (pendingPayout) {
         const transferId = (pendingPayout as any).razorpay_transfer_id as string;
 
-        if (completionPct >= 80) {
-          // ✅ Release: AI says work is substantially complete
+        if (completionPct >= 80 && confidence >= 60) {
+          // ✅ Release: AI verified work is substantially complete with high confidence
           await releaseHold(transferId);
           await db.updatePayout(pendingPayout.id, {
             status:             'Released',
@@ -86,7 +86,7 @@ ${milestoneScores.map(s => `- ${s.title}: ${s.completion}% (${s.status})`).join(
           reasoning += ` [Razorpay Route: settlement hold released on transfer ${transferId}]`;
 
         } else if (completionPct < 20) {
-          // ❌ Reverse: Very little work done — refund client
+          // ❌ Reverse: Minimal progress detected (<20%) — reverse transfer to client
           await reverseTransfer(transferId, escrowAmount);
           await db.updatePayout(pendingPayout.id, {
             status:       'Refunded',
@@ -96,8 +96,9 @@ ${milestoneScores.map(s => `- ${s.title}: ${s.completion}% (${s.status})`).join(
           reasoning += ` [Razorpay Route: transfer reversed, funds returned to client]`;
 
         } else {
-          // ⏳ Partial: Hold maintained — awaiting client decision
-          reasoning += ` [Razorpay Route: transfer remains on hold (${completionPct}% — partial completion). Client must approve or reject via dashboard.]`;
+          // ⚖️ Dispute Route: Mid-range score (20-79%) or low confidence (<60%) — hold locked, route to manual appeal
+          await db.updateProject(projectId, { escrow_status: 'Disputed' });
+          reasoning += ` [Razorpay Route: settlement held in Dispute mode (${completionPct}% score, ${confidence}% confidence). Auto-gated to manual mediation.]`;
         }
       }
     } catch (e: any) {
